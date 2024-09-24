@@ -49,12 +49,12 @@ def health_check():
         logging.error(f"Error in health check: {e}")
         return create_response(500)
 
-# Function to handle all 404 error while app is running
+# Function to handle all 404 errors while app is running
 @app.errorhandler(404)
 def page_not_found(e):
     return create_response(404)
 
-# Function to handle all 404 error before app runs
+# Function to handle all 404 errors before app runs
 @app.before_request
 def check_healthz_route():
     if request.path != '/healthz':
