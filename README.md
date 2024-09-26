@@ -24,6 +24,8 @@ Building a Cloud Native Web Application:
 
 The objective of this Assignment (A01) is to select a technology stack for a backend (API only) Web Application and implement a health check API. The Web App will be build and run locally for this assignment. 
 
+---
+
 ## Getting Started
 
 This section covers the setup required to run the Flask API locally.
@@ -101,3 +103,4 @@ This project follows a **forking workflow**. All development occurs in the forke
 
 ---
 
+/project-root │ ├── /app/ # Application source code (Flask app) │ ├── init.py │ └── app.py │ ├── /postman/ # Postman collections and environment files │ ├── api-tests.postman_collection.json # Collection of API tests │ └── api-env.postman_environment.json # Postman environment variables (do not commit sensitive data) │ ├── /migrations/ # Database migrations (if applicable) ├── /tests/ # Automated tests for the Flask app ├── .env.example # Example environment variables (for development setup) ├── .gitignore # Files and directories to ignore in git ├── README.md # Project documentation ├── requirements.txt # Python dependencies └── Dockerfile # Docker setup (if applicable)
