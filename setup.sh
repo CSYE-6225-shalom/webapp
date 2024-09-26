@@ -20,3 +20,7 @@ if [ -f "app/app.py" ]; then
 else
     echo "app.py not found"
 fi
+
+
+# NOTE: Once application is done running, `deactivate` demo venv. 
+# Then run : `rm -rf demo` to delete virtual environment. 
