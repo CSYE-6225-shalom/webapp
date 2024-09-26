@@ -1,9 +1,10 @@
 #!/bin/bash
 
-# Step 1: Create a virtual environment
+# Step 1: Create a virtual environment. Make sure 'demo' is not an existing venv
 python3 -m venv demo
 
-# Step 2: Activate the virtual environment
+# Step 2: Activate the virtual environment. 
+# Note: if you simply run `sh setup.sh`, it may not work. You must run `source setup.sh` to activate the venv after creation. 
 source demo/bin/activate
 
 # Step 3: Install dependencies from requirements.txt
@@ -11,7 +12,6 @@ if [ -f "requirements.txt" ]; then
     pip install -r requirements.txt
 else
     echo "requirements.txt not found"
-    exit 1
 fi
 
 # Step 4: Run the app.py file
