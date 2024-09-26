@@ -5,9 +5,9 @@ A Flask API built in Python, with a PostgreSQL database setup. This project demo
 ## Table of Contents
 - [Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
+  - [Setting Up PostgreSQL Database](#setting-up-postgresql-database)
   - [Installation](#installation)
 - [Running the Flask App Locally](#running-the-flask-app-locally)
-- [Setting Up PostgreSQL Database](#setting-up-postgresql-database)
 - [Testing the API with Postman](#testing-the-api-with-postman)
 
 ---
@@ -20,9 +20,15 @@ This section covers the setup required to run the Flask API locally.
 
 - Python 3.8 or higher
 - `pip`
-- PostgreSQL. (Create a sample Database and note down the credentials)
+- PostgreSQL
 - Virtual Environment is used to build the app locally
 - Postman
+
+### Setting Up PostgreSQL Database
+
+- Install PostgreSQL (for MacOS) - https://www.postgresql.org/download/macosx/
+- Once installed locally, make sure the server is configured & RUNNING.
+- Create a database and note down the connection credentials and database details.
 
 ### Installation
 
@@ -48,6 +54,12 @@ This section covers the setup required to run the Flask API locally.
     ```
 
 ---
+
+## Running the Flask App Locally
+
+- ``` source setup.sh ``` will setup & run the Flask app locally. 
+- The app can be set to Debug mode to reflect any change made to the application without needing a restart. Set ```DEBUG_MODE = True``` in the .env file. 
+- Now, you can proceed with testing the endpoints and connection with the database. 
 
 ## Testing the API with Postman
 
