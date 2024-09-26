@@ -55,7 +55,7 @@ To test the API endpoints locally, you can use Postman.
 
 - Health Check Endpoint Test
     - Method: GET
-        -URL: http://127.0.0.1:8081/healthz
+    - URL: http://127.0.0.1:8081/healthz
         - Expected Response:
             - Status Code: 200 OK (if the database is connected successfully).
             - Status Code: 503 Service Unavailable (if there is an issue connecting to the database).
