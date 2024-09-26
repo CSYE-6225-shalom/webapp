@@ -73,6 +73,7 @@ WEBAPP
 │   │   └── http_codes.py
 │   └── app.py
 ├── .env
+├── .gitignore
 ├── README.md
 ├── requirements.txt
 └── setup.sh
@@ -97,12 +98,14 @@ To test the API endpoints locally, you can use Postman.
 
 - Health Check Endpoint Test
     - Method: GET
+    - Path: `/healthz`
     - URL: http://127.0.0.1:8081/healthz
+    - All API request responses will be in JSON format.
         - Expected Response:
             - Status Code: 200 OK (if the database is connected successfully).
             - Status Code: 503 Service Unavailable (if there is an issue connecting to the database).
             - Status Code: 400 Bad Request (if you send a request body to this endpoint).
-            - Status Code: 405 Method Not Allowed (if you send a request other than GET method to this endpoint).
+            - Status Code: 405 Method Not Allowed (if you send a request other than `GET` method to this endpoint).
             - Status Code: 404 Not Found (if you send a request that doesnt match the expected url).
 
 ---
