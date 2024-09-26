@@ -45,4 +45,7 @@ else
     return 1
 fi
 
+# NOTE: Once application is done running, `deactivate` demo venv. 
+# Then run : `rm -rf demo` to delete virtual environment. 
+
 echo -e "\n\nMake sure to deactivate & remove venv files. \n\n"
