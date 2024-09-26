@@ -96,7 +96,7 @@ WEBAPP
     source setup.sh
     ```
 - The app can be set to Debug mode to reflect any change made to the application without needing a restart. Set ```DEBUG_MODE = True``` in the ```.env``` file.
-    NOTE: if you make changes to the `.env` file while the app is running, you will need to stop & restart the app to reflect changes made to the `.env` file. This is because, the Flask app reads the environment variables during the initialization phase. These variables are loaded into the environment at the start. 
+    - NOTE: if you make changes to the `.env` file while the app is running, you will need to stop & restart the app to reflect changes made to the `.env` file. This is because, the Flask app reads the environment variables during the initialization phase. These variables are loaded into the environment at the start. 
 - Now, you can proceed with testing the endpoints and connection with the database using Postman.
 
 ---
