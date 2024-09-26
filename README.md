@@ -1,5 +1,7 @@
 # CSYE6225 : Cloud Computing and Network Structures
 
+---
+
 Building a Cloud Native Web Application: 
 
 - Server Operating System: Ubuntu 24.04 LTS
@@ -8,6 +10,7 @@ Building a Cloud Native Web Application:
 - Backend Framework: Flask
 - ORM Framework: Python with SQLAlchemy
 
+---
 
 ## Table of Contents
 - [Objective](#objective)
@@ -20,6 +23,7 @@ Building a Cloud Native Web Application:
 - [Branching and Merging Strategy](#branching-and-merging-strategy)
 
 ---
+
 ## Objective
 
 The objective of this Assignment (A01) is to select a technology stack for a backend (API only) Web Application and implement a health check API. The Web App will be build and run locally for this assignment. 
