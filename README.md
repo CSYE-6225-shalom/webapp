@@ -9,9 +9,8 @@ Building a Cloud Native Web Application:
 - ORM Framework: Python with SQLAlchemy
 
 
-### The objective of this Assignment (A01) is to select a technology stack for a backend (API only) Web Application and implement a health check API.
-
 ## Table of Contents
+- [Objective](#objective)
 - [Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
   - [Setting Up PostgreSQL Database](#setting-up-postgresql-database)
@@ -21,6 +20,9 @@ Building a Cloud Native Web Application:
 - [Branching and Merging Strategy](#branching-and-merging-strategy)
 
 ---
+## Objective
+
+The objective of this Assignment (A01) is to select a technology stack for a backend (API only) Web Application and implement a health check API. The Web App will be build and run locally for this assignment. 
 
 ## Getting Started
 
@@ -36,8 +38,8 @@ This section covers the setup required to run the Flask API locally.
 
 ### Setting Up PostgreSQL Database
 
-- Install PostgreSQL (for MacOS) - https://www.postgresql.org/download/macosx/
-- Once installed locally, make sure the server is configured & RUNNING.
+- Install PostgreSQL locally (for MacOS) - https://www.postgresql.org/download/macosx/
+- Once installed, make sure the server is configured & RUNNING.
 - Create a database and note down the connection credentials and database details.
 
 ### Clone the Repository
@@ -47,7 +49,7 @@ This section covers the setup required to run the Flask API locally.
     git clone https://github.com/CSYE-6225-shalom/webapp.git
     cd webbapp
     ```
-2. Set up the `.env` file with your environment variables:
+2. Set up the `.env` file with your environment variables in the root of the repo:
     ```env
     DB_NAME=your_db_name
     DB_USER=your_db_user
