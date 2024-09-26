@@ -37,7 +37,7 @@ This section covers the setup required to run the Flask API locally.
 
 ### Prerequisites
 
-- Git
+- Git 2.46.0 or higher
 - Python 3.8 or higher
 - `pip`
 - PostgreSQL 16.4 or higher
