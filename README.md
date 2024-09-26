@@ -59,7 +59,7 @@ This section covers the setup required to run the Flask API locally.
 
 1. Clone this repository to your local machine. (Assuming git is configued. Preferably with SSH):
     ```bash
-    git clone https://github.com/CSYE-6225-shalom/webapp.git
+    git clone git@github.com:CSYE-6225-shalom/webapp.git
     cd webapp
     ```
 2. Set up the `.env` file with your environment variables in the root of the repo:
