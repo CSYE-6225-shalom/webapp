@@ -1,4 +1,5 @@
 # CSYE6225 : Cloud Computing and Network Structures
+Semester: FALL 2024 
 
 
 Building a Cloud Native Web Application: 
