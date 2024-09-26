@@ -47,7 +47,7 @@ This section covers the setup required to run the Flask API locally.
 
 - Install PostgreSQL locally (for MacOS) - https://www.postgresql.org/download/macosx/
 - Once installed, make sure the server is configured & RUNNING.
-- Create a database and note down the connection credentials and database details.
+- Create a database, user and note down the connection credentials and database details.
    ```sql
    CREATE DATABASE your_db_name;
    CREATE USER 'your_db_user' WITH ENCRYPTED PASSWORD 'your_password';
