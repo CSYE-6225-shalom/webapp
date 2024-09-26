@@ -63,15 +63,17 @@ This section covers the setup required to run the Flask API locally.
     ```
 3. Folder structure locally should now look like: 
 
+```bash
 WEBAPP
 ├── app
 │   ├── utils
 │   │   └── http_codes.py
 │   └── app.py
+├── .env
 ├── README.md
 ├── requirements.txt
 └── setup.sh
-
+```
 
 ---
 
