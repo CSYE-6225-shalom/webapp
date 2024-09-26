@@ -1,4 +1,4 @@
-# CSYE6225 Cloud Computing and Network Structures
+# CSYE6225 : Cloud Computing and Network Structures
 
 Building a Cloud Native Web Application: 
 
