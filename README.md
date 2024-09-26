@@ -61,6 +61,17 @@ This section covers the setup required to run the Flask API locally.
     PORT=8081
     DEBUG_MODE=True
     ```
+3. Folder structure locally should now look like: 
+
+WEBAPP
+├── app
+│   ├── utils
+│   │   └── http_codes.py
+│   └── app.py
+├── README.md
+├── requirements.txt
+└── setup.sh
+
 
 ---
 
@@ -102,5 +113,3 @@ This project follows a **forking workflow**. All development occurs in the forke
 5. PRs must be reviewed and approved before merging into the `main` branch.
 
 ---
-
-/project-root │ ├── /app/ # Application source code (Flask app) │ ├── init.py │ └── app.py │ ├── /postman/ # Postman collections and environment files │ ├── api-tests.postman_collection.json # Collection of API tests │ └── api-env.postman_environment.json # Postman environment variables (do not commit sensitive data) │ ├── /migrations/ # Database migrations (if applicable) ├── /tests/ # Automated tests for the Flask app ├── .env.example # Example environment variables (for development setup) ├── .gitignore # Files and directories to ignore in git ├── README.md # Project documentation ├── requirements.txt # Python dependencies └── Dockerfile # Docker setup (if applicable)
