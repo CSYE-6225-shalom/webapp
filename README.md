@@ -39,7 +39,7 @@ This section covers the setup required to run the Flask API locally.
 
 - Python 3.8 or higher
 - `pip`
-- PostgreSQL
+- PostgreSQL 16.4 or higher
 - `venv` Virtual Environment is used to build the app locally
 - Postman
 
