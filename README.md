@@ -19,7 +19,7 @@ This section covers the setup required to run the Flask API locally.
 ### Prerequisites
 
 - Python 3.8 or higher
-- `pip`, Homebrew (MacOS)
+- `pip`
 - PostgreSQL. (Create a sample Database and note down the credentials)
 - Virtual Environment is used to build the app locally
 - Postman
@@ -54,11 +54,11 @@ This section covers the setup required to run the Flask API locally.
 To test the API endpoints locally, you can use Postman. 
 
 - Health Check Endpoint Test
-    Method: GET
-    URL: http://127.0.0.1:8081/healthz
-    Expected Response:
-        Status Code: 200 OK (if the database is connected successfully).
-        Status Code: 503 Service Unavailable (if there is an issue connecting to the database).
-        Status Code: 400 Bad Request (if you send a request body to this endpoint).
-        Status Code: 405 Method Not Allowed (if you send a request other than GET method to this endpoint).
-        Status Code: 404 Not Found (if you send a request that doesnt match the expected url).
+    - Method: GET
+        -URL: http://127.0.0.1:8081/healthz
+        - Expected Response:
+            - Status Code: 200 OK (if the database is connected successfully).
+            - Status Code: 503 Service Unavailable (if there is an issue connecting to the database).
+            - Status Code: 400 Bad Request (if you send a request body to this endpoint).
+            - Status Code: 405 Method Not Allowed (if you send a request other than GET method to this endpoint).
+            - Status Code: 404 Not Found (if you send a request that doesnt match the expected url).
