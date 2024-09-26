@@ -1,14 +1,24 @@
-# Flask API with PostgreSQL
+# CSYE6225 Cloud Computing and Network Structures
 
-A Flask API built in Python, with a PostgreSQL database setup. This project demonstrates setting up a simple Flask application with health check endpoints and error handling, using environment variables and PostgreSQL for data persistence.
+Building a Cloud Native Web Application: 
+
+- Server Operating System: Ubuntu 24.04 LTS
+- Programming Language: Python
+- Relational Database: PostgreSQL
+- Backend Framework: Flask
+- ORM Framework: Python with SQLAlchemy
+
+
+### The objective of this Assignment (A01) is to select a technology stack for a backend (API only) Web Application and implement a health check API.
 
 ## Table of Contents
 - [Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
   - [Setting Up PostgreSQL Database](#setting-up-postgresql-database)
-  - [Installation](#installation)
+  - [Clone the Repository](#clone-the-repository)
 - [Running the Flask App Locally](#running-the-flask-app-locally)
 - [Testing the API with Postman](#testing-the-api-with-postman)
+- [Branching and Merging Strategy](#branching-and-merging-strategy)
 
 ---
 
@@ -30,7 +40,7 @@ This section covers the setup required to run the Flask API locally.
 - Once installed locally, make sure the server is configured & RUNNING.
 - Create a database and note down the connection credentials and database details.
 
-### Installation
+### Clone the Repository
 
 1. Clone this repository to your local machine:
     ```bash
@@ -48,18 +58,18 @@ This section covers the setup required to run the Flask API locally.
     DEBUG_MODE=True
     ```
 
-3. Run the setup.sh script to create a virtual environment, activate it & install all dependancies needed to run the app. The setup.sh script will also run the Flask app, if there are no errors during the setup.
-    ```bash
-    source setup.sh
-    ```
-
 ---
 
 ## Running the Flask App Locally
 
-- ``` source setup.sh ``` will setup & run the Flask app locally. 
-- The app can be set to Debug mode to reflect any change made to the application without needing a restart. Set ```DEBUG_MODE = True``` in the .env file. 
+- Run the setup.sh script to create a virtual environment, activate it & install all dependancies needed to run the app. The setup.sh script will also run the Flask app, if there are no errors during the setup.
+    ```bash
+    source setup.sh
+    ```
+- The app can be set to Debug mode to reflect any change made to the application without needing a restart. Set ```DEBUG_MODE = True``` in the ```.env``` file. 
 - Now, you can proceed with testing the endpoints and connection with the database. 
+
+---
 
 ## Testing the API with Postman
 
@@ -74,3 +84,18 @@ To test the API endpoints locally, you can use Postman.
             - Status Code: 400 Bad Request (if you send a request body to this endpoint).
             - Status Code: 405 Method Not Allowed (if you send a request other than GET method to this endpoint).
             - Status Code: 404 Not Found (if you send a request that doesnt match the expected url).
+
+---
+
+## Branching and Merging Strategy
+
+This project follows a **forking workflow**. All development occurs in the forked repository, with changes committed through **Pull Requests (PRs)** from the forked repository into the `main` branch of the main repository. Key guidelines:
+
+1. Fork the main repository to your GitHub account.
+2. Create feature branches in your fork for each change or feature (e.g., `feature/my-new-feature`).
+3. Commit your changes to the feature branch.
+4. Submit a PR from your fork's feature branch to the `main` branch of the main repository.
+5. PRs must be reviewed and approved before merging into the `main` branch.
+
+---
+
