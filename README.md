@@ -37,6 +37,7 @@ This section covers the setup required to run the Flask API locally.
 
 ### Prerequisites
 
+- Git
 - Python 3.8 or higher
 - `pip`
 - PostgreSQL 16.4 or higher
@@ -56,7 +57,7 @@ This section covers the setup required to run the Flask API locally.
 
 ### Clone the Repository
 
-1. Clone this repository to your local machine:
+1. Clone this repository to your local machine. (Assuming git is configued. Preferably with SSH):
     ```bash
     git clone https://github.com/CSYE-6225-shalom/webapp.git
     cd webbapp
