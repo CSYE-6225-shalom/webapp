@@ -8,8 +8,6 @@ from utils.models import db, User, get_est_time
 from utils.db_init import init_db
 import bcrypt
 from flask_httpauth import HTTPBasicAuth
-from datetime import datetime, timezone
-import pytz
 from email_validator import validate_email, EmailNotValidError
 
 # Initialize HTTPBasicAuth
