@@ -44,9 +44,17 @@ def create_app():
     # Health check for database connection
     @app.route('/healthz')
     def health_check():
+        # Define allowed headers
+        ALLOWED_HEADERS = {'Authorization', 'Host', 'Accept', 'Connection', 'User-Agent', 'Accept-Encoding', 'Cache-Control', 'Postman-Token'}
         try:
-            if request.data:
+            # Check for request data or query parameters if added additionally
+            if request.data or request.args:
                 return jsonify({'message': 'Bad Request'}), 400
+
+            # Check for new headers if added
+            incoming_headers = set(request.headers.keys())
+            if not incoming_headers.issubset(ALLOWED_HEADERS):
+                return make_response(jsonify({"error": "Bad Request"}), 400)
 
             db.session.execute(text('SELECT 1'))
             return jsonify({'message': 'Health is OK'}), 200
