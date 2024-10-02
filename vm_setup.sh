@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Function to print messages
+# Function to print messages with timestamp
 print_message() {
     echo "$(date '+%Y-%m-%d %H:%M:%S') - $1"
 }
@@ -35,6 +35,10 @@ python3 --version || handle_error "Failed to get Python version"
 print_message "Checking pip version..."
 pip --version || handle_error "Failed to get pip version"
 
+# Install Python 3.12 venv
+print_message "Installing Python 3.12 venv..."
+sudo apt install python3.12-venv -y || handle_error "Failed to install Python 3.12 venv"
+
 # Install PostgreSQL
 print_message "Installing PostgreSQL..."
 sudo apt install postgresql postgresql-contrib -y || handle_error "Failed to install PostgreSQL"
@@ -43,11 +47,7 @@ sudo apt install postgresql postgresql-contrib -y || handle_error "Failed to ins
 print_message "Checking PostgreSQL status..."
 systemctl status postgresql || handle_error "PostgreSQL is not running"
 
-# Install Python 3.12 venv
-print_message "Installing Python 3.12 venv..."
-sudo apt install python3.12-venv -y || handle_error "Failed to install Python 3.12 venv"
-
-# Create PostgreSQL database and user
+# Create PostgreSQL database and user. This requires switch to postgres user.
 print_message "Creating PostgreSQL database and user..."
 sudo -u postgres psql << EOF
 CREATE DATABASE $DB_NAME;
@@ -63,5 +63,8 @@ python3 -m venv demo || handle_error "Failed to create virtual environment"
 print_message "Activating virtual environment..."
 . demo/bin/activate || handle_error "Failed to activate virtual environment"
 
+# Installing app dependencies from requirements.txt file
+print_message "Installing app dependencies from requirements.txt file..."
+pip install -r requirements.txt || handle_error "Failed to install app dependencies from requirements.txt file"
 
 print_message "Setup completed successfully!"
