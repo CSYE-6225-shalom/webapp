@@ -19,6 +19,10 @@ load_dotenv()
 # Logging config for terminal use
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
+# Define allowed headers globally
+# Any additional header added during runtime, should result in a 400 Bad Request
+ALLOWED_HEADERS = {'Authorization', 'Host', 'Accept', 'Connection', 'User-Agent', 'Accept-Encoding', 'Cache-Control', 'Postman-Token', 'Content-Type', 'Content-Length'}
+
 # Flask app begins here
 def create_app():
     app = Flask(__name__)
@@ -41,20 +45,30 @@ def create_app():
         logging.error(f"Unauthorized access attempt for email: {email}")
         return False
 
+    # Request validation method to check for query parameters, headers added during runtime
+    def validate_request(request):
+        # Check for query parameters if added additionally
+        if request.args:
+            return jsonify({'message': 'Bad Request'}), 400
+
+        # Check for new headers if added
+        incoming_headers = set(request.headers.keys())
+        if not incoming_headers.issubset(ALLOWED_HEADERS):
+            return make_response(jsonify({"error": "Bad Request"}), 400)
+
+        return None
+
     # Health check for database connection
     @app.route('/healthz')
     def health_check():
-        # Define allowed headers
-        ALLOWED_HEADERS = {'Authorization', 'Host', 'Accept', 'Connection', 'User-Agent', 'Accept-Encoding', 'Cache-Control', 'Postman-Token'}
         try:
-            # Check for request data or query parameters if added additionally
-            if request.data or request.args:
+            # THis method should not accept any data in the request
+            if request.data:
                 return jsonify({'message': 'Bad Request'}), 400
-
-            # Check for new headers if added
-            incoming_headers = set(request.headers.keys())
-            if not incoming_headers.issubset(ALLOWED_HEADERS):
-                return make_response(jsonify({"error": "Bad Request"}), 400)
+            
+            validation_response = validate_request(request)
+            if validation_response:
+                return validation_response
 
             db.session.execute(text('SELECT 1'))
             return jsonify({'message': 'Health is OK'}), 200
@@ -68,6 +82,10 @@ def create_app():
     @app.route('/v1/user', methods=['POST'])
     def create_user():
         try:
+            validation_response = validate_request(request)
+            if validation_response:
+                return validation_response
+            
             data = request.get_json()
 
             # Email address validation. If error occurs, this library returns appropriate messages
@@ -114,16 +132,24 @@ def create_app():
     @auth.login_required
     def update_user_info():
         try:
+            validation_response = validate_request(request)
+            if validation_response:
+                return validation_response
+            
             user_email = auth.current_user()
             user = User.query.filter_by(email=user_email).first()
             if user:
                 data = request.get_json()
                 allowed_fields = {'first_name', 'last_name', 'password'}
-                if not all(field in allowed_fields for field in data.keys()):
-                    return jsonify({'message': 'Invalid fields in request'}), 400
+                for field in data.keys():
+                    if field not in allowed_fields:
+                        return jsonify({'message': f'Invalid field in request: {field}'}), 400
                 
-                user.first_name = data.get('first_name', user.first_name)
-                user.last_name = data.get('last_name', user.last_name)
+                # Update user info based on the fields provided. User can choose to update any field. Not mandatory to update all fields
+                if 'first_name' in data:
+                    user.first_name = data['first_name']
+                if 'last_name' in data:
+                    user.last_name = data['last_name']
                 if 'password' in data:
                     existing_pwd = bcrypt.hashpw(data['password'].encode('utf-8'), bcrypt.gensalt())
                     user.password = existing_pwd.decode('utf-8')
@@ -142,6 +168,10 @@ def create_app():
     @auth.login_required
     def get_user_info():
         try:
+            validation_response = validate_request(request)
+            if validation_response:
+                return validation_response
+            
             user_email = auth.current_user()
             user = User.query.filter_by(email=user_email).first()
             user_info = {
