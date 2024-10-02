@@ -8,7 +8,7 @@ print_message() {
 # Function to handle errors
 handle_error() {
     print_message "Error: $1"
-    exit 1
+    return 1
 }
 
 # Source the .env file for env variables

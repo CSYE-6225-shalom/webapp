@@ -87,14 +87,24 @@ def create_app():
             hashed_decoded = hashed.decode('utf-8')
 
             new_user = User(
-                firstname=data['firstname'],
-                lastname=data['lastname'],
+                first_name=data['first_name'],
+                last_name=data['last_name'],
                 email=data['email'],
                 password=hashed_decoded
             )
             db.session.add(new_user)
             db.session.commit()
-            return jsonify({'message': 'User created successfully!'}), 201
+            
+            user_info = {
+                'id': new_user.id,
+                'first_name': new_user.first_name,
+                'last_name': new_user.last_name,
+                'email': new_user.email,
+                'account_created': new_user.account_created,
+                'account_updated': new_user.account_updated
+            }
+            
+            return user_info, 201
         except Exception as e:
             logging.error(f"Error in creating user: {e}")
             return jsonify({'message': f"Missing fields. {str(e)}"}), 400
@@ -108,12 +118,12 @@ def create_app():
             user = User.query.filter_by(email=user_email).first()
             if user:
                 data = request.get_json()
-                allowed_fields = {'firstname', 'lastname', 'password'}
+                allowed_fields = {'first_name', 'last_name', 'password'}
                 if not all(field in allowed_fields for field in data.keys()):
                     return jsonify({'message': 'Invalid fields in request'}), 400
                 
-                user.firstname = data.get('firstname', user.firstname)
-                user.lastname = data.get('lastname', user.lastname)
+                user.first_name = data.get('first_name', user.first_name)
+                user.last_name = data.get('last_name', user.last_name)
                 if 'password' in data:
                     existing_pwd = bcrypt.hashpw(data['password'].encode('utf-8'), bcrypt.gensalt())
                     user.password = existing_pwd.decode('utf-8')
@@ -136,11 +146,11 @@ def create_app():
             user = User.query.filter_by(email=user_email).first()
             user_info = {
                 'id': user.id,
-                'firstname': user.firstname,
-                'lastname': user.lastname,
+                'first_name': user.first_name,
+                'last_name': user.last_name,
                 'email': user.email,
-                'created': user.account_created,
-                'updated': user.account_updated
+                'account_created': user.account_created,
+                'account_updated': user.account_updated
             }
             return jsonify(user_info), 200
         except Exception as e:
@@ -153,6 +163,11 @@ def create_app():
     #   2) when email entered is wrong - 404 User not found
     @auth.error_handler
     def custom_auth_error():
+        auth = request.authorization
+        if auth is None:
+            logging.error("No authentication provided")
+            return jsonify({'message': 'Unauthorized'}), 401
+        
         email = request.authorization.username
         user = User.query.filter_by(email=email).first()
         if user is None:
