@@ -17,8 +17,8 @@ class User(db.Model):
     __tablename__ = 'users'
     
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    firstname = db.Column(db.String(50), nullable=False)
-    lastname = db.Column(db.String(50), nullable=False)
+    first_name = db.Column(db.String(50), nullable=False)
+    last_name = db.Column(db.String(50), nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)
     account_created = db.Column(db.String, default=get_est_time)
