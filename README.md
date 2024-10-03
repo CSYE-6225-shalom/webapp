@@ -15,11 +15,12 @@ Building a Cloud Native Web Application:
 
 ## Table of Contents
 - [Objective](#objective)
-- [Getting Started](#getting-started)
-  - [Prerequisites](#prerequisites)
-  - [Setting Up PostgreSQL Database](#setting-up-postgresql-database)
-  - [Clone the Repository](#clone-the-repository)
-- [Running the Flask App Locally](#running-the-flask-app-locally)
+- [Run the project locally](#run-the-project-locally)
+    - [Prerequisites](#prerequisites)
+    - [Setting Up PostgreSQL Database](#setting-up-postgresql-database)
+    - [Clone the Repository](#clone-the-repository)
+    - [Running the Flask App Locally](#running-the-flask-app-locally)
+- [Run the project on a VM](#run-the-project-on-a-vm)
 - [Testing the API with Postman](#testing-the-api-with-postman)
 - [Branching and Merging Strategy](#branching-and-merging-strategy)
 
@@ -31,11 +32,11 @@ The objective of this Assignment (A01) is to select a technology stack for a bac
 
 ---
 
-## Getting Started
+## Run the project locally
 
 This section covers the setup required to run the Flask API locally.
 
-### Prerequisites
+#### Prerequisites
 
 - Git 2.46.0 or higher
 - Python 3.8 or higher
@@ -44,7 +45,7 @@ This section covers the setup required to run the Flask API locally.
 - `venv` Virtual Environment is used to build the app locally
 - Postman
 
-### Setting Up PostgreSQL Database
+#### Setting Up PostgreSQL Database
 
 - Install PostgreSQL locally (for MacOS) - https://www.postgresql.org/download/macosx/
 - Once installed, make sure the server is configured & RUNNING.
@@ -55,7 +56,7 @@ This section covers the setup required to run the Flask API locally.
    GRANT ALL PRIVILEGES ON DATABASE your_db_name TO your_db_user;
    ```
 
-### Clone the Repository
+#### Clone the Repository
 
 1. Clone this repository to your local machine. (Assuming git is configued. Preferably with SSH):
     ```bash
@@ -89,7 +90,7 @@ WEBAPP
 
 ---
 
-## Running the Flask App Locally
+### Running the Flask App Locally
 
 - Run the setup.sh script to create a virtual environment, activate it & install all dependancies needed to run the app. The setup.sh script will also run the Flask app, if there are no errors during the setup.
     ```bash
@@ -98,6 +99,12 @@ WEBAPP
 - The app can be set to Debug mode to reflect any change made to the application without needing a restart. Set ```DEBUG_MODE = True``` in the ```.env``` file.
     - NOTE: if you make changes to the `.env` file while the app is running, you will need to stop & restart the app to reflect changes made to the `.env` file. This is because, the Flask app reads the environment variables during the initialization phase. These variables are loaded into the environment at the start. 
 - Now, you can proceed with testing the endpoints and connection with the database using Postman.
+
+---
+
+## Run the project on a VM
+
+This section covers the setup required to run the Flask API on a Digital Ocean droplet which is running on an Ubuntu 20.04 LTS operating system.
 
 ---
 
