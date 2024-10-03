@@ -80,26 +80,12 @@ This section covers the setup required to run the Flask API locally.
     PORT=8081
     DEBUG_MODE=True
     ```
-3. Folder structure locally should now look like: 
-
-```bash
-WEBAPP
-├── app
-│   ├── utils
-│   │   └── http_codes.py
-│   └── app.py
-├── .env
-├── .gitignore
-├── README.md
-├── requirements.txt
-└── setup.sh
-```
 
 #### Running the Flask App Locally
 
-- Run the `scripts/setup.sh` script to create a virtual environment, activate it & install all dependancies needed to run the app. The setup.sh script will also run the Flask app, if there are no errors during the setup.
+- Run the `scripts/local_setup.sh` script to create a virtual environment, activate it & install all dependancies needed to run the app. The setup.sh script will also run the Flask app, if there are no errors during the setup.
     ```bash
-    source scripts/setup.sh
+    source scripts/local_setup.sh
     ```
 - The app can be set to Debug mode to reflect any change made to the application without needing a restart. Set ```DEBUG_MODE = True``` in the ```.env``` file.
     - NOTE: if you make changes to the `.env` file while the app is running, you will need to stop & restart the app to reflect changes made to the `.env` file. This is because, the Flask app reads the environment variables during the initialization phase. These variables are loaded into the environment at the start. 
@@ -174,12 +160,16 @@ This section covers the setup required to run the Flask API on a Digital Ocean d
 │   └── app.py
 ├── media
 ├── scripts
+│    └── local_setup.sh
+│    └── vm_setup.sh
 ├── .env
 ├── .gitignore
 ├── README.md
 ├── requirements.txt
-└── vm_setup.sh
 ```
+- Note: 
+    - The `media` folder consists of all images & screenshots required for the documentations.
+    - The `scripts` folder will consist of all scripts that are currently used or may be added in the future.
 - Locate & run the `vm_setup.sh` script to setup the entire project and install necessary dependancies in order to run the project from scratch.
     - The script checks and installs Python, pip, PostgreSQL, creates a PostgreSQL user, sets up a Python virtual environment & activates it and installs all application dependencies from the `requirements.txt` file.
 - At this point, the flaskapp can be run and tested. 
@@ -194,18 +184,20 @@ This section covers the setup required to run the Flask API on a Digital Ocean d
 #### Start Flask App
 
 At this point, the Flask app is setup and configured to run. 
-Run `python app/app.py` inside the Digital Ocean VM instance
+Run the below command inside the Digital Ocean VM instance.
+    - `python app/app.py` 
 
 #### DB Bootstrap
 
-- Inside the `utils` folder, the `db_init.py` initializes a database & creates a `users` table for the application based on the properties specified in `models.py` file.
+- On starting the Flask app, it will automatically bootstrap the postgres database with necessary properties.
+- Inside the `utils` folder, the `db_init.py` initializes the database & creates the `users` table for the application based on the properties specified in `models.py` file.
 - `users` table schema: 
 ![Table Schema](media/table_schema.png)
 
 #### API Routes and Methods
 
 - User Authentication: 
-    - Basic Token based auth is used. No Session or JWT tokens comptabile. 
+    - Basic Token based auth is used. No Session or JWT tokens compatible. 
 
 - Swagger Docs: https://app.swaggerhub.com/apis-docs/csye6225-webapp/cloud-native-webapp/2024.fall.a02#/public/post_v1_user
     - /healthz (GET): A health check endpoint that verifies the database connection.
