@@ -26,6 +26,7 @@ Building a Cloud Native Web Application:
     - [Create a VM instance](#create-a-vm-instance)
     - [Source code transfer](#source-code-transfer)
     - [Run the setup script](#run-the-setup-script)
+    - [Start Flask App](#start-flask-app)
     - [DB Bootstrap](#db-bootstrap)
     - [API Routes and Methods](#api-routes-and-methods)
 - [Branching and Merging Strategy](#branching-and-merging-strategy)
@@ -163,6 +164,22 @@ This section covers the setup required to run the Flask API on a Digital Ocean d
 
 - `cd` into the source code directory.
 - Create an `.env` config file to contain all config properties for the Flask app & copy your configuration.
+- Folder structure on the VM should now look like: 
+
+```bash
+├── app
+│   ├── utils
+│   │   └── db_init.py
+│   │   └── models.py
+│   └── app.py
+├── media
+├── scripts
+├── .env
+├── .gitignore
+├── README.md
+├── requirements.txt
+└── vm_setup.sh
+```
 - Locate & run the `vm_setup.sh` script to setup the entire project and install necessary dependancies in order to run the project from scratch.
     - The script checks and installs Python, pip, PostgreSQL, creates a PostgreSQL user, sets up a Python virtual environment & activates it and installs all application dependencies from the `requirements.txt` file.
 - At this point, the flaskapp can be run and tested. 
@@ -174,6 +191,11 @@ This section covers the setup required to run the Flask API on a Digital Ocean d
     - `sudo systemctl restart postgresql`
     - Now, you should be able to login with the new user to access the tables in the db
 
+#### Start Flask App
+
+At this point, the Flask app is setup and configured to run. 
+Run `python app/app.py` inside the Digital Ocean VM instance
+
 #### DB Bootstrap
 
 - Inside the `utils` folder, the `db_init.py` initializes a database & creates a `users` table for the application based on the properties specified in `models.py` file.
@@ -181,6 +203,9 @@ This section covers the setup required to run the Flask API on a Digital Ocean d
 ![Table Schema](media/table_schema.png)
 
 #### API Routes and Methods
+
+- User Authentication: 
+    - Basic Token based auth is used. No Session or JWT tokens comptabile. 
 
 - Swagger Docs: https://app.swaggerhub.com/apis-docs/csye6225-webapp/cloud-native-webapp/2024.fall.a02#/public/post_v1_user
     - /healthz (GET): A health check endpoint that verifies the database connection.
