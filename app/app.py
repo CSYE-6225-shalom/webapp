@@ -63,7 +63,7 @@ def create_app():
     def health_check():
         try:
             # This method should not accept any data in the request
-            if request.data or request.content_type != 'application/json':
+            if request.data:
                 return jsonify({'message': 'Bad Request'}), 400
             
             validation_response = validate_request(request)
@@ -169,7 +169,7 @@ def create_app():
     def get_user_info():
         try:
             # This method should not accept any data in the request
-            if request.data or request.content_type != 'application/json':
+            if request.data:
                 return jsonify({'message': 'Bad Request'}), 400
             
             validation_response = validate_request(request)
