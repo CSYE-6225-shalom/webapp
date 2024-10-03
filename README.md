@@ -20,8 +20,13 @@ Building a Cloud Native Web Application:
     - [Setting Up PostgreSQL Database](#setting-up-postgresql-database)
     - [Clone the Repository](#clone-the-repository)
     - [Running the Flask App Locally](#running-the-flask-app-locally)
+    - [Testing the API with Postman](#testing-the-api-with-postman)
 - [Run the project on a VM](#run-the-project-on-a-vm)
-- [Testing the API with Postman](#testing-the-api-with-postman)
+    - [Prerequisites](#prerequisites)
+    - [Create a VM instance](#create-a-vm-instance)
+    - [Source code transfer](#source-code-transfer)
+    - [Run the setup script](#run-the-setup-script)
+    - [Testing the API with Postman](#testing-the-api-with-postman)
 - [Branching and Merging Strategy](#branching-and-merging-strategy)
 
 ---
@@ -90,7 +95,7 @@ WEBAPP
 
 ---
 
-### Running the Flask App Locally
+#### Running the Flask App Locally
 
 - Run the setup.sh script to create a virtual environment, activate it & install all dependancies needed to run the app. The setup.sh script will also run the Flask app, if there are no errors during the setup.
     ```bash
@@ -102,13 +107,7 @@ WEBAPP
 
 ---
 
-## Run the project on a VM
-
-This section covers the setup required to run the Flask API on a Digital Ocean droplet which is running on an Ubuntu 20.04 LTS operating system.
-
----
-
-## Testing the API with Postman
+#### Testing the API with Postman
 
 To test the API endpoints locally, you can use Postman. 
 
@@ -125,6 +124,59 @@ To test the API endpoints locally, you can use Postman.
             - Status Code: 404 Not Found (if you send a request that doesnt match the expected url).
 
 ---
+
+## Run the project on a VM
+
+This section covers the setup required to run the Flask API on a Digital Ocean droplet which is running on an Ubuntu 24.04 LTS operating system.
+
+#### Prerequisites
+
+- Python 3.8 or higher
+- PostgreSQL 16.4 or higher 
+- Digital Ocean VM (Droplet) Ubuntu 24.04 LTS
+- Postman
+
+#### Create a VM instance
+
+- For this project, Digital Ocean VM is used. 
+- A 'Basic' droplet with Regular CPU, 1vCPU is used to build the app. 
+- OS: Ubuntu 24.04 LTS
+- Estimated costs: 4$/month
+- Pricing and specs: https://www.digitalocean.com/pricing/droplets#basic-droplets
+- Configure SSH locally and on Digital Ocean to access the VM. 
+- (Optional) Create a config file inside the `~/.ssh` folder to manage multiple SSH keys locally. 
+    - Use below code and replace values
+        ```bash
+            Host <alias name>
+                HostName <ip address>
+                User root (by default)
+                IdentityFile <private ssh key path>
+        ```
+
+#### Source code transfer
+
+- `cd` into the directory where the source code zip resides on the local machine. 
+- run the command, replaced with actual values
+    `scp /<filename>.zip <vm-name>:/root/ `
+- After running the command, you will prompted with entering the passphrase configured. 
+- Cross check whether file was copied to VM inside the `root` directory.
+- To unzip the zip file and access the source code, you will need to manually install `unzip` on the VM. 
+    `ap install unzip`
+- Run `unzip <filename.zip>`
+
+#### Run the setup script
+
+- `cd` into the source code directory.
+- Create an `.env` config file to contain all config properties for the Flask app & copy your configuration.
+- Locate & run the `vm_setup.sh` script to setup the entire project and install necessary dependancies in order to run the project from scratch.
+    - The script checks and installs Python, pip, PostgreSQL, creates a PostgreSQL user, sets up a Python virtual environment & activates it and installs all application dependencies from the `requirements.txt` file.
+- At this point, the flask can be run and tested. 
+- (Optional) To login into the newly created DB with the newly created user, you may have to ensure the authentication is changed from 'peer' to 'md5'.
+    - `cd /etc/postgresql/16/main/`
+    - `nano pg_hba.conf`
+    - Change authentication from peer to md5
+    - `sudo systemctl restart postgresql`
+    - Now, you should be able to login with the new user to access the tables in the db
 
 ## Branching and Merging Strategy
 
