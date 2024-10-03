@@ -26,14 +26,15 @@ Building a Cloud Native Web Application:
     - [Create a VM instance](#create-a-vm-instance)
     - [Source code transfer](#source-code-transfer)
     - [Run the setup script](#run-the-setup-script)
-    - [Testing the API with Postman](#testing-the-api-with-postman)
+    - [DB Bootstrap](#db-bootstrap)
+    - [API Routes and Methods](#api-routes-and-methods)
 - [Branching and Merging Strategy](#branching-and-merging-strategy)
 
 ---
 
 ## Objective
 
-The objective of this Assignment (A01) is to select a technology stack for a backend (API only) Web Application and implement a health check API. The Web App will be build and run locally for this assignment. 
+The objective of this project is to select a technology stack for a backend (API only) Web Application and implement Restful APIs. So far, the project is built locally and on an Ubuntu 24.04 LTS VM.  
 
 ---
 
@@ -109,8 +110,6 @@ WEBAPP
 
 #### Testing the API with Postman
 
-To test the API endpoints locally, you can use Postman. 
-
 - Health Check Endpoint Test
     - Method: GET
     - Path: `/healthz`
@@ -147,10 +146,10 @@ This section covers the setup required to run the Flask API on a Digital Ocean d
 - (Optional) Create a config file inside the `~/.ssh` folder to manage multiple SSH keys locally. 
     - Use below code and replace values
         ```bash
-            Host <alias name>
-                HostName <ip address>
-                User root (by default)
-                IdentityFile <private ssh key path>
+        Host <alias name>
+            HostName <ip address>
+            User root (by default)
+            IdentityFile <private ssh key path>
         ```
 
 #### Source code transfer
@@ -170,17 +169,49 @@ This section covers the setup required to run the Flask API on a Digital Ocean d
 - Create an `.env` config file to contain all config properties for the Flask app & copy your configuration.
 - Locate & run the `vm_setup.sh` script to setup the entire project and install necessary dependancies in order to run the project from scratch.
     - The script checks and installs Python, pip, PostgreSQL, creates a PostgreSQL user, sets up a Python virtual environment & activates it and installs all application dependencies from the `requirements.txt` file.
-- At this point, the flask can be run and tested. 
-- (Optional) To login into the newly created DB with the newly created user, you may have to ensure the authentication is changed from 'peer' to 'md5'.
+- At this point, the flaskapp can be run and tested. 
+- (Optional) To login into the newly created DB with the newly created user, you may have to ensure the authentication is changed from 'peer' to 'md5' in the `pg_hba.conf` file.
+    - Reference: https://stackoverflow.com/questions/18664074/getting-error-peer-authentication-failed-for-user-postgres-when-trying-to-ge
     - `cd /etc/postgresql/16/main/`
     - `nano pg_hba.conf`
     - Change authentication from peer to md5
     - `sudo systemctl restart postgresql`
     - Now, you should be able to login with the new user to access the tables in the db
 
+#### DB Bootstrap
+
+- Inside the `utils` folder, the `db_init.py` initializes a database & creates a `users` table for the application based on the properties specified in `models.py` file.
+- ![Table Schema](media/table_schema.png)
+
+#### API Routes and Methods
+
+- Swagger Docs: https://app.swaggerhub.com/apis-docs/csye6225-webapp/cloud-native-webapp/2024.fall.a02#/public/post_v1_user
+    - /healthz (GET): A health check endpoint that verifies the database connection.
+        - 200: Database is reachable.
+        - 400: Bad request.
+        - 503: Database is unavailable or fails to connect.
+        - 500: Other errors.
+
+    - /v1/user (POST): A user creation endpoint that processes POST requests to create a new user.
+        - 201: User creation was successful.
+        - 400: Bad request.
+    
+    - /v1/user/self (GET): An endpoint to retrieve the current user's information.
+        - 200: Successfully retrieves the user's information.
+        - 400: Bad request.
+        - 401: Unauthorized access if the user is not authenticated.
+        - 404: User not found.
+
+    - /v1/user/self (PUT): An endpoint to update the current user's information.
+        - 204: Successfully updates the user's information.
+        - 400: Bad request.
+        - 401: Unauthorized access if the user is not authenticated.
+        - 404: User not found.
+
+
 ## Branching and Merging Strategy
 
-This project follows a **forking workflow**. All development occurs in the forked repository, with changes committed through **Pull Requests (PRs)** from the forked repository into the `main` branch of the main repository. Key guidelines:
+This repository is created in a Github Organization & follows a **forking workflow**. All development occurs in the forked repository, with changes committed through **Pull Requests (PRs)** from the forked repository into the `main` branch of the main repository. Key guidelines:
 
 1. Fork the main repository to your GitHub account.
 2. Create feature branches in your fork for each change or feature (e.g., `feature/my-new-feature`).
