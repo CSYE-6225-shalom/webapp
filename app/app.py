@@ -23,6 +23,11 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 # Any additional header added during runtime, should result in a 400 Bad Request
 ALLOWED_HEADERS = {'Authorization', 'Host', 'Accept', 'Connection', 'User-Agent', 'Accept-Encoding', 'Cache-Control', 'Postman-Token', 'Content-Type', 'Content-Length'}
 
+# Function to reject body for GET requests
+def reject_body_for_get():
+    if request.method == 'GET' and (request.data or request.form):
+        return jsonify({'message': 'GET requests should not contain a body'}), 400
+
 def configure_app(app):
     app.config['SQLALCHEMY_DATABASE_URI'] = f"postgresql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}"
     db.init_app(app)
@@ -57,8 +62,9 @@ def create_app():
     def health_check():
         try:
             # This method should not accept any data in the request
-            if request.data:
-                return jsonify({'message': 'Bad Request'}), 400
+            error_response = reject_body_for_get()
+            if error_response:
+                return error_response
             validation_response = validate_request(request)
             if validation_response:
                 return validation_response
@@ -151,8 +157,9 @@ def create_app():
     def get_user_info():
         try:
             # This method should not accept any data in the request
-            if request.data:
-                return jsonify({'message': 'Bad Request'}), 400   
+            error_response = reject_body_for_get()
+            if error_response:
+                return error_response
             validation_response = validate_request(request)
             if validation_response:
                 return validation_response 
