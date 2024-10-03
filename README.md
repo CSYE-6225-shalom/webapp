@@ -181,7 +181,8 @@ This section covers the setup required to run the Flask API on a Digital Ocean d
 #### DB Bootstrap
 
 - Inside the `utils` folder, the `db_init.py` initializes a database & creates a `users` table for the application based on the properties specified in `models.py` file.
-- ![Table Schema](media/table_schema.png)
+- `users` table schema: 
+![Table Schema](media/table_schema.png)
 
 #### API Routes and Methods
 
