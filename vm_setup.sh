@@ -50,7 +50,6 @@ systemctl status postgresql || handle_error "PostgreSQL is not running"
 # Create PostgreSQL database and user. This requires switch to postgres user.
 print_message "Creating PostgreSQL database and user..."
 sudo -u postgres psql << EOF
-CREATE DATABASE $DB_NAME;
 CREATE USER $DB_USER WITH PASSWORD '$DB_PASSWORD';
 ALTER USER $DB_USER WITH SUPERUSER;
 EOF

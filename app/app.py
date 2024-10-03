@@ -62,8 +62,8 @@ def create_app():
     @app.route('/healthz')
     def health_check():
         try:
-            # THis method should not accept any data in the request
-            if request.data:
+            # This method should not accept any data in the request
+            if request.data or request.content_type != 'application/json':
                 return jsonify({'message': 'Bad Request'}), 400
             
             validation_response = validate_request(request)
@@ -168,6 +168,10 @@ def create_app():
     @auth.login_required
     def get_user_info():
         try:
+            # This method should not accept any data in the request
+            if request.data or request.content_type != 'application/json':
+                return jsonify({'message': 'Bad Request'}), 400
+            
             validation_response = validate_request(request)
             if validation_response:
                 return validation_response
