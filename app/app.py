@@ -23,53 +23,45 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 # Any additional header added during runtime, should result in a 400 Bad Request
 ALLOWED_HEADERS = {'Authorization', 'Host', 'Accept', 'Connection', 'User-Agent', 'Accept-Encoding', 'Cache-Control', 'Postman-Token', 'Content-Type', 'Content-Length'}
 
+def configure_app(app):
+    app.config['SQLALCHEMY_DATABASE_URI'] = f"postgresql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}"
+    db.init_app(app)
+    
+# Basic Token based authentication for the user
+@auth.verify_password
+def verify_password(email, password):
+    # Retrieve the user from the database based on email ID
+    user = User.query.filter_by(email=email).first()
+    if user and bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8')):
+        return True
+    logging.error(f"Unauthorized access attempt for email: {email}")
+    return False
+    
 # Flask app begins here
 def create_app():
     app = Flask(__name__)
-
-    # Configure SQLAlchemy with .env config file
-    app.config['SQLALCHEMY_DATABASE_URI'] = f"postgresql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}"
-
-    # Initialize SQLAlchemy with the app
-    db.init_app(app)
-
-    # Basic Token based authentication for the user
-    @auth.verify_password
-    def verify_password(email, password):
-        
-        # Retrieve the user from the database based on email ID
-        user = User.query.filter_by(email=email).first()
-        
-        if user and bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8')):
-            return True
-        logging.error(f"Unauthorized access attempt for email: {email}")
-        return False
-
+    configure_app(app)
     # Request validation method to check for query parameters, headers added during runtime
     def validate_request(request):
         # Check for query parameters if added additionally
         if request.args:
             return jsonify({'message': 'Bad Request'}), 400
-
         # Check for new headers if added
         incoming_headers = set(request.headers.keys())
         if not incoming_headers.issubset(ALLOWED_HEADERS):
             return make_response(jsonify({"error": "Bad Request"}), 400)
-
         return None
 
-    # Health check for database connection
+    # Health check for database connection. By default GET method
     @app.route('/healthz')
     def health_check():
         try:
             # This method should not accept any data in the request
             if request.data:
                 return jsonify({'message': 'Bad Request'}), 400
-            
             validation_response = validate_request(request)
             if validation_response:
                 return validation_response
-
             db.session.execute(text('SELECT 1'))
             return jsonify({'message': 'Health is OK'}), 200
         except OperationalError:
@@ -85,25 +77,20 @@ def create_app():
             validation_response = validate_request(request)
             if validation_response:
                 return validation_response
-            
             data = request.get_json()
-
             # Email address validation. If error occurs, this library returns appropriate messages
             try:
                 validate_email(data['email'])
             except EmailNotValidError as e:
                 return jsonify({'message': str(e)}), 400
-            
             if User.query.filter_by(email=data['email']).first():
                 return jsonify({'message': 'User already exists!'}), 400
             hashed = bcrypt.hashpw(data['password'].encode('utf-8'), bcrypt.gensalt())
-            
             # Have to use decode here to avoid the password to be double-encoded
             # Seems to be an issue when using postgresql db
             # without the below command (decode), was facing "Invalid Salt" error when 
             # trying to match the password for existing user
             hashed_decoded = hashed.decode('utf-8')
-
             new_user = User(
                 first_name=data['first_name'],
                 last_name=data['last_name'],
@@ -112,7 +99,6 @@ def create_app():
             )
             db.session.add(new_user)
             db.session.commit()
-            
             user_info = {
                 'id': new_user.id,
                 'first_name': new_user.first_name,
@@ -121,7 +107,6 @@ def create_app():
                 'account_created': new_user.account_created,
                 'account_updated': new_user.account_updated
             }
-            
             return user_info, 201
         except Exception as e:
             logging.error(f"Error in creating user: {e}")
@@ -135,7 +120,6 @@ def create_app():
             validation_response = validate_request(request)
             if validation_response:
                 return validation_response
-            
             user_email = auth.current_user()
             user = User.query.filter_by(email=user_email).first()
             if user:
@@ -143,8 +127,7 @@ def create_app():
                 allowed_fields = {'first_name', 'last_name', 'password'}
                 for field in data.keys():
                     if field not in allowed_fields:
-                        return jsonify({'message': f'Invalid field in request: {field}'}), 400
-                
+                        return jsonify({'message': f'Invalid field in request: {field}'}), 400      
                 # Update user info based on the fields provided. User can choose to update any field. Not mandatory to update all fields
                 if 'first_name' in data:
                     user.first_name = data['first_name']
@@ -153,7 +136,6 @@ def create_app():
                 if 'password' in data:
                     existing_pwd = bcrypt.hashpw(data['password'].encode('utf-8'), bcrypt.gensalt())
                     user.password = existing_pwd.decode('utf-8')
-
                 user.account_updated = get_est_time()
                 db.session.commit()
                 return jsonify({'message': 'User info updated successfully!'}), 204
@@ -170,12 +152,10 @@ def create_app():
         try:
             # This method should not accept any data in the request
             if request.data:
-                return jsonify({'message': 'Bad Request'}), 400
-            
+                return jsonify({'message': 'Bad Request'}), 400   
             validation_response = validate_request(request)
             if validation_response:
-                return validation_response
-            
+                return validation_response 
             user_email = auth.current_user()
             user = User.query.filter_by(email=user_email).first()
             user_info = {
@@ -223,10 +203,11 @@ def create_app():
     def after_request(response):
         response.headers['Cache-Control'] = 'no-cache'
         return response
-
+    
+    # end of routes, functions and decorators
     return app
 
 if __name__ == '__main__':
     app = create_app()
     init_db(app, db)
-    app.run(host='0.0.0.0', port=os.getenv('PORT'), debug=os.getenv('DEBUG_MODE') == 'True')
+    app.run(host='0.0.0.0', port=os.getenv('PORT'), debug = bool(os.getenv('DEBUG_MODE')))
