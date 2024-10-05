@@ -14,15 +14,11 @@ fake = Faker()
 
 @pytest.fixture(scope="module")
 def client():
-    app = create_app()
+    app = create_app(testing="integration")
     app.config['TESTING'] = True
-    db_name = os.getenv('DB_NAME')
-    test_db_name = f"{db_name}_test"
-    db_uri = f"postgresql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{test_db_name}"
-    app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
         
     # Create the test database if it doesn't exist
-    engine = create_engine(db_uri)
+    engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
     if not database_exists(engine.url):
         create_database(engine.url)
         

@@ -28,8 +28,14 @@ def reject_body_for_get():
     if request.method == 'GET' and (request.data or request.form):
         return jsonify({'message': 'GET requests should not contain a body'}), 400
 
-def configure_app(app):
-    app.config['SQLALCHEMY_DATABASE_URI'] = f"postgresql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}"
+def configure_app(app, testing):
+    if testing == 'unit':
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+    elif testing == 'integration':
+        app.config['SQLALCHEMY_DATABASE_URI'] = f"postgresql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}_test"
+    else:
+        app.config['SQLALCHEMY_DATABASE_URI'] = f"postgresql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}"
+
     db.init_app(app)
     
 # Basic Token based authentication for the user
@@ -43,9 +49,9 @@ def verify_password(email, password):
     return False
     
 # Flask app begins here
-def create_app():
+def create_app(testing=None):
     app = Flask(__name__)
-    configure_app(app)
+    configure_app(app, testing)
     # Request validation method to check for query parameters, headers added during runtime
     def validate_request(request):
         # Check for query parameters if added additionally
