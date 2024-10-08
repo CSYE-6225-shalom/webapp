@@ -47,21 +47,22 @@ def verify_password(email, password):
         return True
     logging.error(f"Unauthorized access attempt for email: {email}")
     return False
+
+# Request validation method to check for query parameters, headers added during runtime
+def validate_request(request):
+    # Check for query parameters if added additionally
+    if request.args:
+        return jsonify({'message': 'Bad Request'}), 400
+    # Check for new headers if added
+    incoming_headers = set(request.headers.keys())
+    if not incoming_headers.issubset(ALLOWED_HEADERS):
+        return make_response(jsonify({"error": "Bad Request"}), 400)
+    return None
     
 # Flask app begins here
 def create_app(testing=None):
     app = Flask(__name__)
     configure_app(app, testing)
-    # Request validation method to check for query parameters, headers added during runtime
-    def validate_request(request):
-        # Check for query parameters if added additionally
-        if request.args:
-            return jsonify({'message': 'Bad Request'}), 400
-        # Check for new headers if added
-        incoming_headers = set(request.headers.keys())
-        if not incoming_headers.issubset(ALLOWED_HEADERS):
-            return make_response(jsonify({"error": "Bad Request"}), 400)
-        return None
 
     # Health check for database connection. By default GET method
     @app.route('/healthz')
