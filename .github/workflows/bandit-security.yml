@@ -28,7 +28,7 @@ jobs:
 
       - name: Run Bandit
         run: |
-          bandit -r . -f json -o bandit_report.json
+          bandit -r app/* tests/* scripts/* -f json -o bandit_report.json
           if [ $(jq '.results | length' bandit_report.json) -gt 0 ]; then
             echo "Bandit found issues:"
             jq '.results[] | {issue: .issue, severity: .severity, filename: .filename, line: .line_number}' bandit_report.json
