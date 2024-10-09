@@ -55,8 +55,11 @@ jobs:
         echo DB_PORT=${{ secrets.DB_PORT }} >> .env
         cat .env   
 
-    - name: Run unit tests
-      run: pytest tests/test_unit.py --cov=app --cov-report=xml
+    - name: Run Flake8
+      run: flake8 .
 
+    - name: Run unit tests
+      run: pytest tests/test_unit.py --cov=app --cov-report=xml 
+    
     - name: Run integration tests
       run: pytest tests/test_integration.py --cov=app --cov-report=xml

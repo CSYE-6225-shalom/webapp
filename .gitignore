@@ -35,3 +35,6 @@ Thumbs.db
 *.tmp
 *.bak
 *.swp
+
+# Test files configuration
+.flake8
