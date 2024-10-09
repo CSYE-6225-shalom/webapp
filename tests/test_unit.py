@@ -7,6 +7,7 @@ from app import create_app, db, User
 import bcrypt
 from faker import Faker
 import base64
+import random
 
 fake = Faker()
 
@@ -26,7 +27,8 @@ def client():
 print("\n--- Starting All Endpoint Tests ---")
 
 local_part = fake.email().split('@')[0]
-domain = fake.domain_name()
+domains = ["gmail.com", "outlook.com", "yahoo.com", "hotmail.com"]
+domain = random.choice(domains)
 email = f"{local_part}@{domain}"
 create_data = {
     'first_name': fake.first_name(),

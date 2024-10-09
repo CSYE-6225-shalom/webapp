@@ -9,6 +9,7 @@ from sqlalchemy import create_engine
 from sqlalchemy_utils import database_exists, create_database, drop_database
 from app import create_app, db
 from faker import Faker
+import random
 
 fake = Faker()
 
@@ -34,7 +35,8 @@ def client():
 print("\n--- Starting Integration Tests ---")
 
 local_part = fake.email().split('@')[0]
-domain = fake.domain_name()
+domains = ["gmail.com", "outlook.com", "yahoo.com", "hotmail.com"]
+domain = random.choice(domains)
 email = f"{local_part}@{domain}"
 create_data = {
     'first_name': fake.first_name(),
