@@ -1,13 +1,14 @@
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from app import create_app, db, User
+import sys
+import os
+from flask import json
 import bcrypt
 from faker import Faker
 import base64
 import random
 import pytest
-from flask import json
-import sys
-import os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from app import create_app, db, User
+
 
 fake = Faker()
 
@@ -24,6 +25,7 @@ def client():
 
         db.session.remove()
         db.drop_all()
+
 
 print("\n--- Starting All Endpoint Tests ---")
 

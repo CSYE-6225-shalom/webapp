@@ -88,7 +88,7 @@ def create_app(testing=None):
             logging.error(f"Error in health check: {e}")
             return 500
 
-    # Method to Create user 
+    # Method to Create user
     @app.route('/v1/user', methods=['POST'])
     def create_user():
         try:
@@ -106,7 +106,7 @@ def create_app(testing=None):
             hashed = bcrypt.hashpw(data['password'].encode('utf-8'), bcrypt.gensalt())
             # Have to use decode here to avoid the password to be double-encoded
             # Seems to be an issue when using postgresql db
-            # without the below command (decode), was facing "Invalid Salt" error when 
+            # without the below command (decode), was facing "Invalid Salt" error when
             # trying to match the password for existing user
             hashed_decoded = hashed.decode('utf-8')
             new_user = User(
@@ -145,7 +145,7 @@ def create_app(testing=None):
                 allowed_fields = {'first_name', 'last_name', 'password'}
                 for field in data.keys():
                     if field not in allowed_fields:
-                        return jsonify({'message': f'Invalid field in request: {field}'}), 400      
+                        return jsonify({'message': f'Invalid field in request: {field}'}), 400
                 # Update user info based on the fields provided. User can choose to update any field. Not mandatory to update all fields
                 if 'first_name' in data:
                     user.first_name = data['first_name']
@@ -174,7 +174,7 @@ def create_app(testing=None):
                 return error_response
             validation_response = validate_request(request)
             if validation_response:
-                return validation_response 
+                return validation_response
             user_email = auth.current_user()
             user = User.query.filter_by(email=user_email).first()
             user_info = {
@@ -191,7 +191,7 @@ def create_app(testing=None):
             return jsonify({'message': 'User not found!'}), 404
 
     # Decorator to handle error for authentication failures
-    # This will handle 2 cases during authentication : 
+    # This will handle 2 cases during authentication :
     #   1) when email entered is correct but password is wrong - 401 unauthorized
     #   2) when email entered is wrong - 404 User not found
     @auth.error_handler
