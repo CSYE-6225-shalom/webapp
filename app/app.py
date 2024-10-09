@@ -28,8 +28,14 @@ def reject_body_for_get():
     if request.method == 'GET' and (request.data or request.form):
         return jsonify({'message': 'GET requests should not contain a body'}), 400
 
-def configure_app(app):
-    app.config['SQLALCHEMY_DATABASE_URI'] = f"postgresql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}"
+def configure_app(app, testing):
+    if testing == 'unit':
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+    elif testing == 'integration':
+        app.config['SQLALCHEMY_DATABASE_URI'] = f"postgresql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}_test"
+    else:
+        app.config['SQLALCHEMY_DATABASE_URI'] = f"postgresql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}"
+
     db.init_app(app)
     
 # Basic Token based authentication for the user
@@ -41,21 +47,22 @@ def verify_password(email, password):
         return True
     logging.error(f"Unauthorized access attempt for email: {email}")
     return False
+
+# Request validation method to check for query parameters, headers added during runtime
+def validate_request(request):
+    # Check for query parameters if added additionally
+    if request.args:
+        return jsonify({'message': 'Bad Request'}), 400
+    # Check for new headers if added
+    incoming_headers = set(request.headers.keys())
+    if not incoming_headers.issubset(ALLOWED_HEADERS):
+        return make_response(jsonify({"error": "Bad Request"}), 400)
+    return None
     
 # Flask app begins here
-def create_app():
+def create_app(testing=None):
     app = Flask(__name__)
-    configure_app(app)
-    # Request validation method to check for query parameters, headers added during runtime
-    def validate_request(request):
-        # Check for query parameters if added additionally
-        if request.args:
-            return jsonify({'message': 'Bad Request'}), 400
-        # Check for new headers if added
-        incoming_headers = set(request.headers.keys())
-        if not incoming_headers.issubset(ALLOWED_HEADERS):
-            return make_response(jsonify({"error": "Bad Request"}), 400)
-        return None
+    configure_app(app, testing)
 
     # Health check for database connection. By default GET method
     @app.route('/healthz')
