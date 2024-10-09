@@ -86,7 +86,7 @@ def create_app(testing=None):
             return '', 503
         except Exception as e:
             logging.error(f"Error in health check: {e}")
-            return 500
+            return '', 500
 
     # Method to Create user
     @app.route('/v1/user', methods=['POST'])
