@@ -54,7 +54,7 @@ jobs:
 
     - name: Create a new PostgreSQL user
       run: |
-        psql -h localhost -U postgres -d postgres -c "CREATE USER shalomlabs WITH PASSWORD 'csye6225';"
+        psql -h localhost -U postgres -W postgres -d postgres -c "CREATE USER shalomlabs WITH PASSWORD 'csye6225';"
 
     - name: 'Create env file'
       run: |
