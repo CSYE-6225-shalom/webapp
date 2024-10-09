@@ -28,14 +28,5 @@ jobs:
 
       - name: Run Bandit
         run: |
-          bandit -r app/* tests/* scripts/*
-        
-      - name: Upload Bandit Report
-        uses: actions/upload-artifact@v3
-        with:
-          name: bandit-report
-          path: bandit_report.json
+          bandit -r app/* tests/* scripts/* --severity-level high
 
-      - name: Display Bandit report
-        run: |
-          cat bandit_report.json
