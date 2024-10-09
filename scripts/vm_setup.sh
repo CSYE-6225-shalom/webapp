@@ -35,9 +35,9 @@ python3 --version || handle_error "Failed to get Python version"
 print_message "Checking pip version..."
 pip --version || handle_error "Failed to get pip version"
 
-# # Install Python 3.12 venv
-# print_message "Installing Python 3.12 venv..."
-# sudo apt install python3.12-venv -y || handle_error "Failed to install Python 3.12 venv"
+# Install Python 3.12 venv
+print_message "Installing Python 3.12 venv..."
+sudo apt install python3.12-venv -y || handle_error "Failed to install Python 3.12 venv"
 
 # Install PostgreSQL
 print_message "Installing PostgreSQL..."
@@ -54,13 +54,13 @@ CREATE USER $DB_USER WITH PASSWORD '$DB_PASSWORD';
 ALTER USER $DB_USER WITH SUPERUSER;
 EOF
 
-# # Create virtual environment
-# print_message "Creating virtual environment..."
-# python3 -m venv demo || handle_error "Failed to create virtual environment"
+# Create virtual environment
+print_message "Creating virtual environment..."
+python3 -m venv demo || handle_error "Failed to create virtual environment"
 
-# # Activate virtual environment
-# print_message "Activating virtual environment..."
-# . demo/bin/activate || handle_error "Failed to activate virtual environment"
+# Activate virtual environment
+print_message "Activating virtual environment..."
+. demo/bin/activate || handle_error "Failed to activate virtual environment"
 
 # Installing app dependencies from requirements.txt file
 print_message "Installing app dependencies from requirements.txt file..."
