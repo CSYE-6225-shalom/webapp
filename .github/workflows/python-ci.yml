@@ -7,7 +7,7 @@ on:
     branches: [ main ]
 
 jobs:
-  test:
+  python-ci-checks:
     runs-on: ubuntu-latest
 
     steps:
@@ -27,11 +27,15 @@ jobs:
     - name: Run unit tests
       run: pytest tests/test_unit.py --cov=app --cov-report=xml
     
+    - name: 'Create env file'
+      run: |
+        touch .env
+        echo DB_USER=${{ secrets.DB_USER }} >> .env
+        echo DB_PASSWORD=${{ secrets.DB_PASSWORD }} >> .env
+        echo DB_HOST=${{ secrets.DB_HOST }} >> .env
+        echo DB_NAME=${{ secrets.DB_NAME }} >> .env
+        echo DB_PORT=${{ secrets.DB_PORT }} >> .env
+        cat .env    
+    
     - name: Run integration tests
-      env:
-        DB_USER: ${{ secrets.DB_USER }}
-        DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-        DB_HOST: ${{ secrets.DB_HOST }}
-        DB_NAME: ${{ secrets.DB_NAME }}
-        DB_PORT: ${{ secrets.DB_PORT }}
       run: pytest tests/test_integration.py --cov=app --cov-report=xml --cov-append
