@@ -1,0 +1,44 @@
+name: Bandit Security Check
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  bandit:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run Bandit
+        run: |
+            bandit -r your_package_or_directory -f json -o bandit_report.json
+            if [ $(jq '.results | length' bandit_report.json) -gt 0 ]; then
+              echo "Bandit found issues!"
+              exit 1
+            fi
+        
+      - name: Upload Bandit Report
+        uses: actions/upload-artifact@v2
+        with:
+          name: bandit-report
+          path: bandit_report.json
+
+      - name: Display Bandit report
+        run: |
+          cat bandit_report.json
