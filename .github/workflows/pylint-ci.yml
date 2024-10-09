@@ -25,6 +25,20 @@ jobs:
         pip install pylint
 
     - name: Analysing the code with pylint
+      id: pylint
       run: |
-        pylint $(git ls-files '*.py') > pylint_report.txt || true
+        pylint $(git ls-files '*.py') | tee pylint_report.txt | tail -n 3 > pylint_score.txt  # Save the last 3 lines to check for the score
         cat pylint_report.txt
+
+    - name: Extract Pylint Score
+      id: extract_score
+      run: |
+        score=$(tail -n 1 pylint_score.txt | awk '{print $1}')  # Get the score from the last line
+        echo "Pylint Score: $score"
+        echo "::set-output name=score::$score"  # Set the score as an output variable
+
+    - name: Fail workflow if score is below 7
+      if: ${{ fromJson(steps.extract_score.outputs.score) < 7 }}  # Check if score is below 7
+      run: |
+        echo "Pylint score is below 7. Failing the workflow."
+        exit 1
