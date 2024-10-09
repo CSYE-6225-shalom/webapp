@@ -28,7 +28,7 @@ jobs:
 
       - name: Run Bandit
         run: |
-          bandit -r app/* tests/* scripts/* -f json -o bandit_report.json
+          bandit -r app/* tests/* scripts/*
         
       - name: Upload Bandit Report
         uses: actions/upload-artifact@v3
