@@ -29,4 +29,3 @@ jobs:
       - name: Run Bandit
         run: |
           bandit -r app/* tests/* scripts/* --severity-level high
-

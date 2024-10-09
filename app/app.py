@@ -12,7 +12,7 @@ from email_validator import validate_email, EmailNotValidError
 
 # Initialize HTTPBasicAuth
 auth = HTTPBasicAuth()
-password = "mysecretpassword"
+
 # Load environment variables from .env
 load_dotenv()
 
