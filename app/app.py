@@ -81,12 +81,12 @@ def create_app(testing=None):
             if validation_response:
                 return validation_response
             db.session.execute(text('SELECT 1'))
-            return 200
+            return '', 200
         except OperationalError:
-            return 503
+            return '', 503
         except Exception as e:
             logging.error(f"Error in health check: {e}")
-            return 500
+            return '', 500
 
     # Method to Create user
     @app.route('/v1/user', methods=['POST'])
