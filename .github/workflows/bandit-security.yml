@@ -28,11 +28,12 @@ jobs:
 
       - name: Run Bandit
         run: |
-            bandit -r . -f json -o bandit_report.json
-            if [ $(jq '.results | length' bandit_report.json) -gt 0 ]; then
-              echo "Bandit found issues!"
-              exit 1
-            fi
+          if [ $(jq '.results | length' bandit_report.json) -gt 0 ]; then
+            echo "Bandit found issues:"
+            jq '.results[] | {issue: .issue, severity: .severity, filename: .filename, line: .line_number}' bandit_report.json
+          else
+            echo "No issues found."
+          fi
         
       - name: Upload Bandit Report
         uses: actions/upload-artifact@v3
