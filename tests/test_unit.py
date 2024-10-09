@@ -1,29 +1,32 @@
-import pytest
-from flask import json
 import sys
 import os
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from app import create_app, db, User
+from flask import json
 import bcrypt
 from faker import Faker
 import base64
 import random
+import pytest
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from app import create_app, db, User
+
 
 fake = Faker()
+
 
 @pytest.fixture(scope="module")
 def client():
     app = create_app(testing="unit")
     app.config['TESTING'] = True
-    
+
     with app.test_client() as client:
         with app.app_context():
             db.create_all()
             yield client
-            
+
         db.session.remove()
         db.drop_all()
-        
+
+
 print("\n--- Starting All Endpoint Tests ---")
 
 local_part = fake.email().split('@')[0]
@@ -43,6 +46,7 @@ update_data = {
     'password': fake.password()
 }
 
+
 def test_health_endpoint(client):
     try:
         print("\n1. Testing Health Check")
@@ -52,6 +56,7 @@ def test_health_endpoint(client):
         print("Health check passed")
     except AssertionError as e:
         print(f"Health check failed: {e}")
+
 
 def test_user_creation_endpoint(client):
     try:
@@ -63,6 +68,7 @@ def test_user_creation_endpoint(client):
         print("User created successfully")
     except AssertionError as e:
         print(f"User creation failed: {e}")
+
 
 def test_create_user_verification():
     try:
@@ -76,6 +82,7 @@ def test_create_user_verification():
     except AssertionError as e:
         print(f"Failed to verify user creation: {e}")
 
+
 def test_existing_user(client):
     try:
         print("\n4. Testing Create Existing User")
@@ -85,7 +92,8 @@ def test_existing_user(client):
         print("Existing user creation prevented")
     except AssertionError as e:
         print(f"Failed to test exist user creation: {e}")
-        
+
+
 def test_update_user(client):
     try:
         print("\n5. Testing Update User")
@@ -100,6 +108,7 @@ def test_update_user(client):
     except AssertionError as e:
         print(f"Failed to update user: {e}")
 
+
 def test_update_user_verification():
     try:
         print("\n6. Verifying User Update")
@@ -110,6 +119,7 @@ def test_update_user_verification():
         print("User update verified")
     except AssertionError as e:
         print(f"Failed to verify user info modification: {e}")
+
 
 def test_get_user_info_endpoint(client):
     try:
@@ -126,6 +136,7 @@ def test_get_user_info_endpoint(client):
     except AssertionError as e:
         print(f"Failed to get created user info: {e}")
 
+
 def test_unauthorized_access_request(client):
     try:
         print("\n8. Testing Unauthorized Access")
@@ -134,6 +145,7 @@ def test_unauthorized_access_request(client):
         print("Unauthorized access prevented")
     except AssertionError as e:
         print(f"Failed to verify unauthorized requests: {e}")
+
 
 def test_invalid_email_request(client):
     try:
@@ -150,6 +162,7 @@ def test_invalid_email_request(client):
     except AssertionError as e:
         print(f"Failed to validate user email: {e}")
 
+
 def test_invalid_method_request(client):
     try:
         print("\n10. Testing Method Not Allowed")
@@ -160,6 +173,7 @@ def test_invalid_method_request(client):
     except AssertionError as e:
         print(f"Failed to verify invalid method requests: {e}")
 
+
 def test_invalid_path_request(client):
     try:
         print("\n11. Testing Not Found")
@@ -169,6 +183,7 @@ def test_invalid_path_request(client):
         print("Page not found error returned")
     except AssertionError as e:
         print(f"Failed to verify invalid path requests: {e}")
+
 
 def test_request_with_extra_headers(client):
     try:
@@ -183,6 +198,7 @@ def test_request_with_extra_headers(client):
         print("User info request with extra headers handled correctly")
     except AssertionError as e:
         print(f"Failed to verify requests with extra Headers: {e}")
+
 
 def test_request_with_params(client):
     try:
@@ -200,7 +216,7 @@ def test_request_with_params(client):
     except AssertionError as e:
         print(f"Failed to verify requests with params: {e}")
 
-    
+
 def test_get_request_with_body(client):
     try:
         print("\n14. Testing Request with Body for GET Method")
@@ -217,5 +233,5 @@ def test_get_request_with_body(client):
     except AssertionError as e:
         print(f"Failed to verify requests with body: {e}")
 
-print("\n--- All Endpoint Tests Completed ---")
 
+print("\n--- All Endpoint Tests Completed ---")

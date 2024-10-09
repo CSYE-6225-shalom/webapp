@@ -23,10 +23,12 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 # Any additional header added during runtime, should result in a 400 Bad Request
 ALLOWED_HEADERS = {'Authorization', 'Host', 'Accept', 'Connection', 'User-Agent', 'Accept-Encoding', 'Cache-Control', 'Postman-Token', 'Content-Type', 'Content-Length'}
 
+
 # Function to reject body for GET requests
 def reject_body_for_get():
     if request.method == 'GET' and (request.data or request.form):
         return jsonify({'message': 'GET requests should not contain a body'}), 400
+
 
 def configure_app(app, testing):
     if testing == 'unit':
@@ -37,7 +39,8 @@ def configure_app(app, testing):
         app.config['SQLALCHEMY_DATABASE_URI'] = f"postgresql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}"
 
     db.init_app(app)
-    
+
+
 # Basic Token based authentication for the user
 @auth.verify_password
 def verify_password(email, password):
@@ -47,6 +50,7 @@ def verify_password(email, password):
         return True
     logging.error(f"Unauthorized access attempt for email: {email}")
     return False
+
 
 # Request validation method to check for query parameters, headers added during runtime
 def validate_request(request):
@@ -58,7 +62,8 @@ def validate_request(request):
     if not incoming_headers.issubset(ALLOWED_HEADERS):
         return make_response(jsonify({"error": "Bad Request"}), 400)
     return None
-    
+
+
 # Flask app begins here
 def create_app(testing=None):
     app = Flask(__name__)
@@ -76,14 +81,14 @@ def create_app(testing=None):
             if validation_response:
                 return validation_response
             db.session.execute(text('SELECT 1'))
-            return jsonify({'message': 'Health is OK'}), 200
+            return '', 200
         except OperationalError:
-            return jsonify({'message': 'Service Unavailable'}), 503
+            return '', 503
         except Exception as e:
             logging.error(f"Error in health check: {e}")
-            return jsonify({'message': 'Internal Server Error'}), 500
-    
-    # Method to Create user 
+            return '', 500
+
+    # Method to Create user
     @app.route('/v1/user', methods=['POST'])
     def create_user():
         try:
@@ -101,7 +106,7 @@ def create_app(testing=None):
             hashed = bcrypt.hashpw(data['password'].encode('utf-8'), bcrypt.gensalt())
             # Have to use decode here to avoid the password to be double-encoded
             # Seems to be an issue when using postgresql db
-            # without the below command (decode), was facing "Invalid Salt" error when 
+            # without the below command (decode), was facing "Invalid Salt" error when
             # trying to match the password for existing user
             hashed_decoded = hashed.decode('utf-8')
             new_user = User(
@@ -140,7 +145,7 @@ def create_app(testing=None):
                 allowed_fields = {'first_name', 'last_name', 'password'}
                 for field in data.keys():
                     if field not in allowed_fields:
-                        return jsonify({'message': f'Invalid field in request: {field}'}), 400      
+                        return jsonify({'message': f'Invalid field in request: {field}'}), 400
                 # Update user info based on the fields provided. User can choose to update any field. Not mandatory to update all fields
                 if 'first_name' in data:
                     user.first_name = data['first_name']
@@ -169,7 +174,7 @@ def create_app(testing=None):
                 return error_response
             validation_response = validate_request(request)
             if validation_response:
-                return validation_response 
+                return validation_response
             user_email = auth.current_user()
             user = User.query.filter_by(email=user_email).first()
             user_info = {
@@ -186,7 +191,7 @@ def create_app(testing=None):
             return jsonify({'message': 'User not found!'}), 404
 
     # Decorator to handle error for authentication failures
-    # This will handle 2 cases during authentication : 
+    # This will handle 2 cases during authentication :
     #   1) when email entered is correct but password is wrong - 401 unauthorized
     #   2) when email entered is wrong - 404 User not found
     @auth.error_handler
@@ -195,7 +200,7 @@ def create_app(testing=None):
         if auth is None:
             logging.error("No authentication provided")
             return jsonify({'message': 'Unauthorized'}), 401
-        
+
         email = request.authorization.username
         user = User.query.filter_by(email=email).first()
         if user is None:
@@ -205,8 +210,11 @@ def create_app(testing=None):
     # Decorator to handle error for all requests where the path is incorrect
     @app.errorhandler(404)
     def page_not_found(e):
-        return jsonify({'message': 'Not Found. The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.'}), 404
-    
+        return jsonify({'message': (
+            'Not Found. The requested URL was not found on the server. '
+            'If you entered the URL manually please check your spelling and try again.'
+        )}), 404
+
     # Decorator to handle error for all requests where the method for that request path is invalid
     @app.errorhandler(405)
     def method_not_allowed(e):
@@ -217,11 +225,12 @@ def create_app(testing=None):
     def after_request(response):
         response.headers['Cache-Control'] = 'no-cache'
         return response
-    
+
     # end of routes, functions and decorators
     return app
+
 
 if __name__ == '__main__':
     app = create_app()
     init_db(app, db)
-    app.run(host='0.0.0.0', port=os.getenv('PORT'), debug = bool(os.getenv('DEBUG_MODE')))
+    app.run(host='0.0.0.0', port=os.getenv('PORT'), debug=bool(os.getenv('DEBUG_MODE')))
