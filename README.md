@@ -30,6 +30,14 @@ Building a Cloud Native Web Application:
     - [DB Bootstrap](#db-bootstrap)
     - [API Routes and Methods](#api-routes-and-methods)
 - [Branching and Merging Strategy](#branching-and-merging-strategy)
+- [Testing the Application](#testing-the-application)
+    - [Prerequisites](#prerequisites)
+    - [Running Tests](#running-tests)
+    - [Test Setup](#test-setup)
+    - [Test Cases](#test-cases)
+- [GitHub Workflow](#github-workflow)
+    - [Python CI Workflow](#python-ci-workflow)
+    - [Bandit Security Workflow](#bandit-security-workflow)
 
 ---
 
@@ -153,6 +161,10 @@ This section covers the setup required to run the Flask API on a Digital Ocean d
 - Folder structure on the VM should now look like: 
 
 ```bash
+├── .github
+│   ├── workflows
+│   │   └── bandit-security.yml
+│   │   └── python-ci.yml
 ├── app
 │   ├── utils
 │   │   └── db_init.py
@@ -162,7 +174,12 @@ This section covers the setup required to run the Flask API on a Digital Ocean d
 ├── scripts
 │    └── local_setup.sh
 │    └── vm_setup.sh
+├── tests
+│    └── conftest.py
+│    └── test_integration.py
+│    └── test_unit.py
 ├── .env
+├── .flake8
 ├── .gitignore
 ├── README.md
 ├── requirements.txt
@@ -232,5 +249,129 @@ This repository is created in a Github Organization & follows a **forking workfl
 3. Commit your changes to the feature branch.
 4. Submit a PR from your fork's feature branch to the `main` branch of the main repository.
 5. PRs must be reviewed and approved before merging into the `main` branch.
+
+---
+
+## Testing the Application
+
+This section covers the setup required to run the unit tests for the Flask API.
+
+#### Prerequisites
+
+- Ensure you have all the dependencies installed as specified in the `requirements.txt` file.
+- The Unit Test use a mock in-memory SQLite database for testing the endpoints. 
+- The integration tests use an actual PostgreSQL database for testing.
+
+
+#### Running Tests
+
+The tests are located in the `tests/` folder. These tests cover various endpoints and functionalities of the Flask API.
+
+#### Test Setup
+
+1. **Install pytest**: Ensure `pytest` is installed in your virtual environment.
+    ```bash
+    pip install pytest
+    ```
+
+2. **Run the tests**: Execute the tests using the following command:
+    ```bash
+    pytest tests/test_unit.py
+    pytest tests/test_integration.py
+    ```
+
+#### Test Cases
+
+The following test cases are included in the `tests/test_unit.py` file:
+
+1. **Health Check Endpoint**:
+    - **Test**: `test_health_endpoint`
+    - **Description**: Verifies the `/healthz` endpoint returns a 200 status code when the database is connected successfully.
+
+2. **User Creation Endpoint**:
+    - **Test**: `test_user_creation_endpoint`
+    - **Description**: Tests the `/v1/user` endpoint for creating a new user and verifies the response status code and data.
+
+3. **User Creation Verification**:
+    - **Test**: `test_create_user_verification`
+    - **Description**: Verifies the user creation and password hashing in the database.
+
+4. **Existing User Creation**:
+    - **Test**: `test_existing_user`
+    - **Description**: Tests the creation of an existing user and expects a 400 status code with an appropriate error message.
+
+5. **User Update Endpoint**:
+    - **Test**: `test_update_user`
+    - **Description**: Tests the `/v1/user/self` endpoint for updating user information and verifies the response status code.
+
+6. **User Update Verification**:
+    - **Test**: `test_update_user_verification`
+    - **Description**: Verifies the updated user information in the database.
+
+7. **Get User Info Endpoint**:
+    - **Test**: `test_get_user_info_endpoint`
+    - **Description**: Tests the `/v1/user/self` endpoint for retrieving user information and verifies the response data.
+
+8. **Unauthorized Access Request**:
+    - **Test**: `test_unauthorized_access_request`
+    - **Description**: Verifies that unauthorized access to the `/v1/user/self` endpoint is prevented.
+
+9. **Invalid Email Request**:
+    - **Test**: `test_invalid_email_request`
+    - **Description**: Tests the creation of a user with an invalid email and expects a 400 status code.
+
+10. **Invalid Method Request**:
+    - **Test**: `test_invalid_method_request`
+    - **Description**: Verifies that sending a POST request to the `/healthz` endpoint returns a 405 status code.
+
+11. **Invalid Path Request**:
+    - **Test**: `test_invalid_path_request`
+    - **Description**: Verifies that accessing an invalid path returns a 404 status code.
+
+12. **Request with Extra Headers**:
+    - **Test**: `test_request_with_extra_headers`
+    - **Description**: Verifies that requests with extra headers to the `/v1/user/self` endpoint return a 400 status code.
+
+13. **Request with Extra Params**:
+    - **Test**: `test_request_with_params`
+    - **Description**: Verifies that requests with extra query parameters to the `/v1/user/self` endpoint return a 400 status code.
+
+14. **GET Request with Body**:
+    - **Test**: `test_get_request_with_body`
+    - **Description**: Verifies that GET requests with a body to the `/v1/user/self` endpoint return a 400 status code.
+
+By following the above steps, you can ensure that the Flask API is thoroughly tested and validated.
+
+---
+
+## GitHub Workflow
+
+This project uses GitHub Actions to automate testing, code quality & security checks. The workflows are defined in `.github/workflows/python-ci.yml` and `.github/workflows/bandit-security.yml.` includes the following steps:
+
+#### Python CI Workflow
+
+- **Trigger**: The workflow is triggered on push and pull request events to the `main` branch.
+- **Environment**: The workflow runs on `ubuntu-latest` and sets up a PostgreSQL service.
+- **Steps**:
+  1. **Checkout Code**: Uses the `actions/checkout@v2` action to checkout the repository code.
+  2. **Set up Python**: Uses the `actions/setup-python@v2` action to set up Python 3.9.
+  3. **Install Dependencies**: Installs the required dependencies using `pip`.
+  4. **Create PostgreSQL User**: Creates a new PostgreSQL user with superuser privileges.
+  5. **Create Environment File**: Creates a `.env` file with database credentials.
+  6. **Run Flake8**: Runs `flake8` to check for code style issues, ignoring specific errors.
+  7. **Run Unit Tests**: Runs unit tests using `pytest` and generates a coverage report.
+  8. **Run Integration Tests**: Runs integration tests using `pytest` and generates a coverage report.
+
+#### Bandit Security Workflow
+
+- **Trigger**: The workflow is triggered on push and pull request events to the `main` branch.
+- **Environment**: The workflow runs on `ubuntu-latest`.
+- **Steps**:
+  1. **Checkout Code**: Uses the `actions/checkout@v2` action to checkout the repository code.
+  2. **Set up Python**: Uses the `actions/setup-python@v2` action to set up Python 3.9.
+  3. **Install Dependencies**: Installs the required dependencies using `pip`.
+  4. **Run Bandit**: Runs `bandit` to perform security checks on the codebase with a focus on high-severity issues.
+
+These workflows ensure that the code is tested, validated, and checked for security vulnerabilities automatically on each push and pull request, maintaining code quality and reliability.
 
 ---

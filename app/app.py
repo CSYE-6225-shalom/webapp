@@ -64,6 +64,13 @@ def validate_request(request):
     return None
 
 
+# Password validation function
+def validate_password(password):
+    if not password or len(password) < 5:
+        return False, "Password must be at least 5 characters long."
+    return True, ""
+
+
 # Flask app begins here
 def create_app(testing=None):
     app = Flask(__name__)
@@ -103,6 +110,10 @@ def create_app(testing=None):
                 return jsonify({'message': str(e)}), 400
             if User.query.filter_by(email=data['email']).first():
                 return jsonify({'message': 'User already exists!'}), 400
+            # Validate password
+            is_valid, message = validate_password(data['password'])
+            if not is_valid:
+                return jsonify({'message': message}), 400
             hashed = bcrypt.hashpw(data['password'].encode('utf-8'), bcrypt.gensalt())
             # Have to use decode here to avoid the password to be double-encoded
             # Seems to be an issue when using postgresql db
@@ -152,6 +163,9 @@ def create_app(testing=None):
                 if 'last_name' in data:
                     user.last_name = data['last_name']
                 if 'password' in data:
+                    is_valid, message = validate_password(data['password'])
+                    if not is_valid:
+                        return jsonify({'message': message}), 400
                     existing_pwd = bcrypt.hashpw(data['password'].encode('utf-8'), bcrypt.gensalt())
                     user.password = existing_pwd.decode('utf-8')
                 user.account_updated = get_est_time()
