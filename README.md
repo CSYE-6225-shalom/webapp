@@ -161,6 +161,10 @@ This section covers the setup required to run the Flask API on a Digital Ocean d
 - Folder structure on the VM should now look like: 
 
 ```bash
+├── .github
+│   ├── workflows
+│   │   └── bandit-security.yml
+│   │   └── python-ci.yml
 ├── app
 │   ├── utils
 │   │   └── db_init.py
@@ -170,7 +174,12 @@ This section covers the setup required to run the Flask API on a Digital Ocean d
 ├── scripts
 │    └── local_setup.sh
 │    └── vm_setup.sh
+├── tests
+│    └── conftest.py
+│    └── test_integration.py
+│    └── test_unit.py
 ├── .env
+├── .flake8
 ├── .gitignore
 ├── README.md
 ├── requirements.txt
