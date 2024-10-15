@@ -13,7 +13,7 @@ source "amazon-ebs" "ubuntu" {
 
   instance_type = "t2.micro"
   region        = "us-east-1"
-  profile       = "dev-neu"
+  // profile       = "dev-neu"
 
   source_ami_filter {
     filters = {
