@@ -1,8 +1,6 @@
 name: Python Tests
 
 on:
-  push:
-    branches: [ main ]
   pull_request:
     branches: [ main ]
 
@@ -63,3 +61,20 @@ jobs:
     
     - name: Run integration tests
       run: pytest tests/test_integration.py --cov=app --cov-report=xml
+
+    - name: Set up Packer
+      uses: hashicorp/setup-packer@v2
+      with:
+        version: latest
+
+    - name: Packer Init
+      run: packer init .
+      continue-on-error: false
+
+    - name: Packer Format Check
+      run: packer fmt -check -diff .
+      continue-on-error: false
+
+    - name: Packer Validate
+      run: packer validate .
+      continue-on-error: false
