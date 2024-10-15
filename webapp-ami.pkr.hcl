@@ -4,8 +4,8 @@ packer {
       version = ">= 1.0.0, <2.0.0"
       source  = "github.com/hashicorp/amazon"
     }
-  }
-}
+   }
+ }
 
 source "amazon-ebs" "ubuntu" {
   ami_name        = "csye6225_webapp_ubuntu_24_04_${formatdate("YYYY_MM_DD", timestamp())}"
