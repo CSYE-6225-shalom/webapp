@@ -31,8 +31,8 @@ jobs:
         echo DB_NAME=${{ secrets.DB_NAME }} >> .env
         echo DB_PORT=${{ secrets.DB_PORT }} >> .env
         echo PORT=${{ secrets.APP_PORT }} >> .env
-        echo DEV_DEFAUTLT_VPC_ID = ${{ secrets.DEV_DEFAUTLT_VPC_ID }} >> .env
-        echo AWS_REGION = ${{ secrets.AWS_REGION }} >> .env
+        echo DEV_DEFAUTLT_VPC_ID=${{ secrets.DEV_DEFAUTLT_VPC_ID }} >> .env
+        echo AWS_REGION=${{ secrets.AWS_REGION }} >> .env
         cat .env   
 
     - name: Run Flake8
