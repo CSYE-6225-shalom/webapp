@@ -18,7 +18,7 @@ variable "AWS_REGION" {
   type = string
 }
 
-variable "vpc_id" {
+variable "DEV_DEFAUTLT_VPC_ID" {
   type = string
 }
 
