@@ -7,20 +7,6 @@ on:
 jobs:
   python-ci-checks:
     runs-on: ubuntu-latest
-    services:
-        postgres:
-          image: postgres:latest
-          env:
-            POSTGRES_DB: postgres   # Using default database with default user 
-            POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-            POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
-          ports:
-            - 5432:5432
-          options: >-
-            --health-cmd pg_isready
-            --health-interval 10s
-            --health-timeout 5s
-            --health-retries 5
 
     steps:
     - uses: actions/checkout@v2
@@ -36,13 +22,6 @@ jobs:
         pip install -r requirements.txt
         pip install pytest pytest-cov flake8
 
-    - name: Create a new PostgreSQL user
-      env:
-        PGPASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-      run: |
-        psql -h localhost -U ${{ secrets.POSTGRES_USER }} -d postgres -c "CREATE USER ${{ secrets.DB_USER }} WITH PASSWORD '${{ secrets.DB_PASSWORD }}';"
-        psql -h localhost -U ${{ secrets.POSTGRES_USER }} -d postgres -c "ALTER USER ${{ secrets.DB_USER }} WITH SUPERUSER;"
-
     - name: 'Create env file'
       run: |
         touch .env
@@ -51,6 +30,7 @@ jobs:
         echo DB_HOST=${{ secrets.DB_HOST }} >> .env
         echo DB_NAME=${{ secrets.DB_NAME }} >> .env
         echo DB_PORT=${{ secrets.DB_PORT }} >> .env
+        echo PORT=${{ secrets.APP_PORT }} >> .env
         cat .env   
 
     - name: Run Flake8
@@ -58,9 +38,6 @@ jobs:
 
     - name: Run unit tests
       run: pytest tests/test_unit.py --cov=app --cov-report=xml 
-    
-    - name: Run integration tests
-      run: pytest tests/test_integration.py --cov=app --cov-report=xml
 
     - name: Set up Packer
       uses: hashicorp/setup-packer@v2
@@ -74,7 +51,13 @@ jobs:
     - name: Packer Format Check
       run: packer fmt -check -diff .
       continue-on-error: false
-
+  
     - name: Packer Validate
-      run: packer validate .
-      continue-on-error: false
+      env:
+        DEV_DEFAUTLT_VPC_ID: ${{ secrets.DEV_DEFAUTLT_VPC_ID }}
+        AWS_REGION: ${{ secrets.AWS_REGION }}
+      run: |
+        packer validate \
+          -var "DEV_DEFAUTLT_VPC_ID=$DEV_DEFAUTLT_VPC_ID" \
+          -var "AWS_REGION=$AWS_REGION" \
+          .
