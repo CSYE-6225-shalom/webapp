@@ -51,7 +51,7 @@ def test_health_endpoint(client):
     try:
         print("\n1. Testing Health Check")
         response = client.get('/healthz')
-        assert response.status_code == 404
+        assert response.status_co
         assert b'Health is OK' in response.data
         print("Health check passed")
     except AssertionError as e:
