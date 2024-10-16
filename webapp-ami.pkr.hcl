@@ -34,7 +34,7 @@ source "amazon-ebs" "ubuntu" {
       virtualization-type = "hvm"
     }
     most_recent = true
-    owners      = local.source_ami_owner_id
+    owners      = [local.source_ami_owner_id]
   }
   ssh_username = "ubuntu"
   vpc_id       = var.vpc_id
