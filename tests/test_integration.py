@@ -18,7 +18,8 @@ def client():
     app.config['TESTING'] = True
 
     # Create the test database if it doesn't exist
-    engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
+    # engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
+    engine = create_engine(app.config[''])
     if not database_exists(engine.url):
         create_database(engine.url)
 
