@@ -51,14 +51,8 @@ jobs:
     - name: Packer Format Check
       run: packer fmt -check -diff .
       continue-on-error: false
-
-    - name: Packer Validate
-      run: |
-        export $(cat .env | xargs)
-        packer validate .
-      continue-on-error: false
   
-    - name: Packer Build
+    - name: Packer Validate
       env:
         DEV_DEFAUTLT_VPC_ID: ${{ secrets.DEV_DEFAUTLT_VPC_ID }}
         AWS_REGION: ${{ secrets.AWS_REGION }}
