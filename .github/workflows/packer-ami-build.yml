@@ -76,11 +76,21 @@ jobs:
       continue-on-error: false
 
     - name: Validate Packer template
-      run: packer validate .
-      continue-on-error: false
+      env:
+        DEV_DEFAUTLT_VPC_ID: ${{ secrets.DEV_DEFAUTLT_VPC_ID }}
+        AWS_REGION: ${{ secrets.AWS_REGION }}
+      run: |
+        packer validate \
+          -var "DEV_DEFAUTLT_VPC_ID=$DEV_DEFAUTLT_VPC_ID" \
+          -var "AWS_REGION=$AWS_REGION" \
+          .
 
     - name: Packer Build AMI
+      env:
+        DEV_DEFAUTLT_VPC_ID: ${{ secrets.DEV_DEFAUTLT_VPC_ID }}
+        AWS_REGION: ${{ secrets.AWS_REGION }}
       run: |
-        export $(cat .env | xargs)
-        packer build webapp-ami.pkr.hcl
+        packer build \
+          -var "DEV_DEFAUTLT_VPC_ID=$DEV_DEFAUTLT_VPC_ID" \
+          -var "AWS_REGION=$AWS_REGION" \webapp-ami.pkr.hcl
       continue-on-error: false
