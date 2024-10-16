@@ -14,12 +14,20 @@ locals {
   source_ami_owner_id = "099720109477" // Ubuntu Canonical account ID
 }
 
+variable "AWS_REGION" {
+  type = string
+}
+
+variable "vpc_id" {
+  type = string
+}
+
 source "amazon-ebs" "ubuntu" {
   ami_name        = "csye6225_webapp_ubuntu_24_04_${formatdate("YYYY_MM_DD", timestamp())}"
   ami_description = "Custom Ubuntu 24.04 AMI for Webapp Assignment04"
 
   instance_type = local.ec2_instance_type
-  region        = local.AWS_REGION
+  region        = var.AWS_REGION
 
   source_ami_filter {
     filters = {
@@ -31,7 +39,7 @@ source "amazon-ebs" "ubuntu" {
     owners      = local.source_ami_owner_id
   }
   ssh_username = "ubuntu"
-  vpc_id       = local.vpc_id
+  vpc_id       = var.vpc_id
 }
 
 build {
