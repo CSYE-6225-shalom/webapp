@@ -8,9 +8,9 @@ packer {
 }
 
 locals {
-  vpc_id = env("DEV_DEFAUTLT_VPC_ID")
-  AWS_REGION = env("AWS_REGION")
-  ec2_instance_type = "t2.micro"
+  vpc_id              = env("DEV_DEFAUTLT_VPC_ID")
+  AWS_REGION          = env("AWS_REGION")
+  ec2_instance_type   = "t2.micro"
   source_ami_owner_id = "099720109477" // Ubuntu Canonical account ID
 }
 
