@@ -31,8 +31,6 @@ jobs:
         echo DB_NAME=${{ secrets.DB_NAME }} >> .env
         echo DB_PORT=${{ secrets.DB_PORT }} >> .env
         echo PORT=${{ secrets.APP_PORT }} >> .env
-        echo DEV_DEFAUTLT_VPC_ID=${{ secrets.DEV_DEFAUTLT_VPC_ID }} >> .env
-        echo AWS_REGION=${{ secrets.AWS_REGION }} >> .env
         cat .env   
 
     - name: Run Flake8
@@ -59,3 +57,13 @@ jobs:
         export $(cat .env | xargs)
         packer validate .
       continue-on-error: false
+  
+    - name: Packer Build
+      env:
+        DEV_DEFAUTLT_VPC_ID: ${{ secrets.DEV_DEFAUTLT_VPC_ID }}
+        AWS_REGION: ${{ secrets.AWS_REGION }}
+      run: |
+        packer validate \
+          -var "DEV_DEFAUTLT_VPC_ID=$DEV_DEFAUTLT_VPC_ID" \
+          -var "AWS_REGION=$AWS_REGION" \
+          .
