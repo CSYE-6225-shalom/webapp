@@ -31,7 +31,7 @@ variable "AWS_DEMO_ACCOUNT_ID" {
 }
 
 source "amazon-ebs" "ubuntu" {
-  ami_name        = "csye6225_webapp_ubuntu_24_04_${formatdate("YYYY_MM_DD", timestamp())}"
+  ami_name        = "csye6225_webapp_ubuntu_24_04_${formatdate("YYYY_MM_DDhhmmss", timestamp())}"
   ami_description = "Custom Ubuntu 24.04 AMI for Webapp Assignment04"
   ami_users       = [var.AWS_DEMO_ACCOUNT_ID]
   instance_type   = var.ec2_instance_type
