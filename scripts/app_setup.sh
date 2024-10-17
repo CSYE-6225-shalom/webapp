@@ -16,6 +16,9 @@ sudo apt install python3 python3-pip -y
 sudo apt install postgresql postgresql-contrib -y 
 sudo apt install python3.12-venv -y 
 
+# faced errors while installing requirements.txt file libraries and modules. 
+# break-system-packages used cause no virtual environment was used
+# ignore-installed flags seemed to have fixed all issues
 sudo pip install -r /opt/webapp/requirements.txt --break-system-packages --ignore-installed 
 
 sudo -u postgres psql << EOF
@@ -26,3 +29,7 @@ EOF
 sudo systemctl daemon-reload
 sudo systemctl enable webapp-systemd.service
 sudo systemctl start webapp-systemd.service
+
+# After creating or modifying a service file, use daemon-reload.
+# Then enable the service if you want it to start automatically on boot.
+# Finally, start the service if you want it to run right away.
