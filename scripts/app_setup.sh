@@ -13,7 +13,7 @@ sudo chown -R csye6225:csye6225 /opt/webapp
 source /opt/webapp/.env
 
 sudo apt install python3 python3-pip -y
-sudo apt install postgresql postgresql-contrib -y 
+sudo apt install postgresql postgresql-contrib -y
 sudo apt install python3.12-venv -y 
 
 # faced errors while installing requirements.txt file libraries and modules. 
@@ -21,10 +21,10 @@ sudo apt install python3.12-venv -y
 # ignore-installed flags seemed to have fixed all issues
 sudo pip install -r /opt/webapp/requirements.txt --break-system-packages --ignore-installed 
 
-sudo -u postgres psql << EOF
-CREATE USER $DB_USER WITH PASSWORD '$DB_PASSWORD';
-ALTER USER $DB_USER WITH SUPERUSER;
-EOF
+# sudo -u postgres psql << EOF
+# CREATE USER $DB_USER WITH PASSWORD '$DB_PASSWORD';
+# ALTER USER $DB_USER WITH SUPERUSER;
+# EOF
 
 sudo systemctl daemon-reload
 sudo systemctl enable webapp-systemd.service

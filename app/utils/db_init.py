@@ -4,6 +4,7 @@ from sqlalchemy.exc import OperationalError
 
 
 def init_db(app, db):
+    print("Initializing database...")
     with app.app_context():
         try:
             # Check if the database exists, if not create it

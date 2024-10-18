@@ -9,6 +9,7 @@ from utils.db_init import init_db
 import bcrypt
 from flask_httpauth import HTTPBasicAuth
 from email_validator import validate_email, EmailNotValidError
+from urllib.parse import quote_plus
 
 # Initialize HTTPBasicAuth
 auth = HTTPBasicAuth()
@@ -36,7 +37,14 @@ def configure_app(app, testing):
     elif testing == 'integration':
         app.config['SQLALCHEMY_DATABASE_URI'] = f"postgresql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}_test"
     else:
-        app.config['SQLALCHEMY_DATABASE_URI'] = f"postgresql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}"
+        # AWS RDS connection string
+        db_user = quote_plus(os.getenv('RDS_USERNAME'))
+        db_password = quote_plus(os.getenv('RDS_PASSWORD'))
+        db_host = os.getenv('RDS_HOSTNAME')
+        db_port = os.getenv('RDS_PORT', '5432')
+        db_name = os.getenv('RDS_DB_NAME')
+        
+        app.config['SQLALCHEMY_DATABASE_URI'] = f"postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
 
     db.init_app(app)
 

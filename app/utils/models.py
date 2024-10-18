@@ -16,6 +16,7 @@ def get_est_time():
 
 
 class User(db.Model):
+    print("Creating User model...")
     __tablename__ = 'users'
 
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
