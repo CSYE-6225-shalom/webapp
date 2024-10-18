@@ -42,7 +42,7 @@ def configure_app(app, testing):
         db_password = quote_plus(os.getenv('RDS_PASSWORD'))
         db_host = os.getenv('RDS_HOSTNAME')
         db_port = os.getenv('RDS_PORT', '5432')
-        db_name = os.getenv('RDS_DB_NAME')  
+        db_name = os.getenv('RDS_DB_NAME') 
         app.config['SQLALCHEMY_DATABASE_URI'] = f"postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
 
     db.init_app(app)
