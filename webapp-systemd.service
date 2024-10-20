@@ -8,7 +8,6 @@ User=csye6225
 Group=csye6225
 WorkingDirectory=/opt/webapp
 ExecStart=/usr/bin/python3 /opt/webapp/app/app.py
-EnvironmentFile=/opt/webapp/.env
 Restart=always
 RestartSec=3
 StandardOutput=syslog
