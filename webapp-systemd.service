@@ -1,5 +1,6 @@
 [Unit]
 Description=Flask WebApp for CSYE-6225 (NEU F24)
+ConditionPathExists=/opt/webapp/.env
 After=network.target
 
 [Service]
