@@ -1,5 +1,6 @@
 [Unit]
 Description=Flask WebApp for CSYE-6225 (NEU F24)
+ConditionPathExists=/opt/webapp/.env
 After=network.target
 
 [Service]
@@ -7,7 +8,6 @@ Type=simple
 User=csye6225
 Group=csye6225
 WorkingDirectory=/opt/webapp
-ExecStartPre=/bin/bash -c 'if [ ! -f /opt/webapp/.env ]; then echo ".env file not found" >&2; exit 1; fi'
 ExecStart=/usr/bin/python3 /opt/webapp/app/app.py
 Restart=always
 RestartSec=3
