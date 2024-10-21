@@ -86,4 +86,4 @@ build {
   provisioner "shell" {
     script = "scripts/app_setup.sh"
   }
-}
+ }
