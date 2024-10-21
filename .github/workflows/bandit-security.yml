@@ -3,7 +3,7 @@ name: Bandit Security Check
 on:
   pull_request:
     branches:
-      - main
+      - a04-demo
 
 jobs:
   bandit:
