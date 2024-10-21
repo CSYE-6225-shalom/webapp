@@ -2,7 +2,7 @@ name: Python Tests
 
 on:
   pull_request:
-    branches: [ main ]
+    branches: [ a04-demo ]
 
 jobs:
   python-ci-checks:
