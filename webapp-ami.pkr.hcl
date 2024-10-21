@@ -47,7 +47,7 @@ source "amazon-ebs" "ubuntu" {
     owners      = [var.source_ami_owner_id]
   }
   ssh_username = "ubuntu"
-  vpc_id       = var.DEV_DEFAUTLT_VPC_IDs
+  vpc_id       = var.DEV_DEFAUTLT_VPC_ID
 }
 
 build {
