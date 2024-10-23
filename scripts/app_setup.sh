@@ -9,7 +9,6 @@ sudo cp /tmp/webapp-systemd.service /etc/systemd/system/webapp-systemd.service
 sudo chown -R csye6225:csye6225 /opt/webapp
 
 sudo apt install python3 python3-pip -y
-sudo apt install postgresql postgresql-contrib -y
 sudo apt install python3.12-venv -y 
 
 # faced errors while installing requirements.txt file libraries and modules. 
