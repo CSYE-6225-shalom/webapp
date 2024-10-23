@@ -69,11 +69,6 @@ build {
   }
 
   provisioner "file" {
-    source      = ".env"
-    destination = "/tmp/.env"
-  }
-
-  provisioner "file" {
     source      = "requirements.txt"
     destination = "/tmp/requirements.txt"
   }
