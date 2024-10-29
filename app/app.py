@@ -12,6 +12,7 @@ from email_validator import validate_email, EmailNotValidError
 from urllib.parse import quote_plus
 from statsd import StatsClient
 import time
+import sys
 
 # Initialize HTTPBasicAuth
 auth = HTTPBasicAuth()
@@ -19,15 +20,16 @@ auth = HTTPBasicAuth()
 # Load environment variables from .env
 load_dotenv()
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,  # Set the logging level
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',  # Log format
-    handlers=[
-        logging.FileHandler("/var/log/webapp/csye6225-webapp.log"),  # Log file name
-        logging.StreamHandler()  # Also log to console
-    ]
-)
+# Configure logging.. if not running under pytest
+if 'pytest' not in sys.modules:
+    logging.basicConfig(
+        level=logging.INFO,  # Set the logging level
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',  # Log format
+        handlers=[
+            logging.FileHandler("/var/log/webapp/csye6225-webapp.log"),  # Log file name
+            logging.StreamHandler()  # Also log to console
+        ]
+    )
 
 # Define allowed headers globally
 # Any additional header added during runtime, should result in a 400 Bad Request

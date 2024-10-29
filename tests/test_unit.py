@@ -8,16 +8,6 @@ import random
 import pytest
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from app import create_app, db, User
-import logging
-
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,  # Set the logging level
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',  # Log format
-    handlers=[
-        logging.StreamHandler()  # Also log to console
-    ]
-)
 
 fake = Faker()
 
