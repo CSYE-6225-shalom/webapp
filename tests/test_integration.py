@@ -6,8 +6,17 @@ import bcrypt
 import base64
 from sqlalchemy import create_engine
 from sqlalchemy_utils import database_exists, create_database, drop_database
-
 import random
+import logging
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,  # Set the logging level
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',  # Log format
+    handlers=[
+        logging.StreamHandler()  # Also log to console
+    ]
+)
 
 fake = Faker()
 
