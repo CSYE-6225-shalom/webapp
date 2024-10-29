@@ -10,6 +10,9 @@ import bcrypt
 from flask_httpauth import HTTPBasicAuth
 from email_validator import validate_email, EmailNotValidError
 from urllib.parse import quote_plus
+from statsd import StatsClient
+import time
+import sys
 
 # Initialize HTTPBasicAuth
 auth = HTTPBasicAuth()
@@ -17,8 +20,16 @@ auth = HTTPBasicAuth()
 # Load environment variables from .env
 load_dotenv()
 
-# Logging config for terminal use
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+# Configure logging.. if not running under pytest
+if 'pytest' not in sys.modules:
+    logging.basicConfig(
+        level=logging.INFO,  # Set the logging level
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',  # Log format
+        handlers=[
+            logging.FileHandler("/var/log/webapp/csye6225-webapp.log"),  # Log file name
+            logging.StreamHandler()  # Also log to console
+        ]
+    )
 
 # Define allowed headers globally
 # Any additional header added during runtime, should result in a 400 Bad Request
@@ -81,6 +92,7 @@ def validate_password(password):
 # Flask app begins here
 def create_app(testing=None):
     app = Flask(__name__)
+    statsd_client = StatsClient('localhost', 8125)
     configure_app(app, testing)
 
     # Health check for database connection. By default GET method
@@ -246,6 +258,26 @@ def create_app(testing=None):
     def after_request(response):
         response.headers['Cache-Control'] = 'no-cache'
         return response
+
+    # Decorator to calculate the time taken for each request
+    @app.before_request
+    def start_timer():
+        request.start_time = time.time()
+
+    # Decorator to log the time taken for each request
+    @app.after_request
+    def log_request_time(response):
+        if hasattr(request, 'start_time'):
+            duration = time.time() - request.start_time
+            endpoint = request.endpoint or 'unknown'
+            statsd_client.timing(f'api.{endpoint}.duration', duration * 1000)  # in ms
+        return response
+
+    # Decorator to increment the request count for each endpoint
+    @app.before_request
+    def increment_request_count():
+        endpoint = request.endpoint or 'unknown'
+        statsd_client.incr(f'api.{endpoint}.requests')
 
     # end of routes, functions and decorators
     return app

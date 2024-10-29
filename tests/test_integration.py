@@ -6,7 +6,6 @@ import bcrypt
 import base64
 from sqlalchemy import create_engine
 from sqlalchemy_utils import database_exists, create_database, drop_database
-
 import random
 
 fake = Faker()

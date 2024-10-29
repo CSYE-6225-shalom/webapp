@@ -5,6 +5,10 @@ set -e
 sudo cp -r /tmp/app /opt/webapp/app
 sudo cp /tmp/requirements.txt /opt/webapp/requirements.txt
 sudo cp /tmp/webapp-systemd.service /etc/systemd/system/webapp-systemd.service
+sudo cp /tmp/cloudwatch-config.json /opt/cloudwatch-config.json
+
+# create a log directory for the 'webapp' in /var/log/ directory
+sudo mkdir /var/log/webapp
 
 sudo chown -R csye6225:csye6225 /opt/webapp
 
