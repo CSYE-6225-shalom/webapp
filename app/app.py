@@ -29,7 +29,7 @@ if 'pytest' not in sys.modules:
         level=logging.INFO,  # Set the logging level
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',  # Log format
         handlers=[
-            logging.FileHandler("/var/log/csye6225-webapp.log"),  # Log file name
+            logging.FileHandler("/var/log/webapp/csye6225-webapp.log"),  # Log file name
             logging.StreamHandler()  # Also log to console
         ]
     )
