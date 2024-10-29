@@ -10,7 +10,10 @@ sudo cp /tmp/cloudwatch-config.json /opt/cloudwatch-config.json
 # create a log directory for the 'webapp' in /var/log/ directory
 sudo mkdir /var/log/webapp
 
+# change the ownership of the directories to the user 'csye622
 sudo chown -R csye6225:csye6225 /opt/webapp
+sudo chown -R csye6225:csye6225 /var/log/webapp
+sudo chmod 750 /var/log/webapp
 
 sudo apt install python3 python3-pip -y
 sudo apt install python3.12-venv -y 
