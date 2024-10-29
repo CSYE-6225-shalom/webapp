@@ -3,6 +3,7 @@ from datetime import datetime
 import uuid
 from sqlalchemy.dialects.postgresql import UUID
 import pytz
+import logging
 
 db = SQLAlchemy()
 
@@ -16,7 +17,7 @@ def get_est_time():
 
 
 class User(db.Model):
-    print("Creating User model...")
+    logging.info("Creating User model...")
     __tablename__ = 'users'
 
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
@@ -29,3 +30,19 @@ class User(db.Model):
 
     def __repr__(self):
         return f'<User {self.email}>'
+
+
+class Image(db.Model):
+    logging.info("Creating Image model...")
+    __tablename__ = 'images'
+
+    id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    file_name = db.Column(db.String(255), nullable=False)
+    url = db.Column(db.String(255), nullable=False)
+    upload_date = db.Column(db.DateTime, nullable=False, default=get_est_time)
+    user_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id'), nullable=False)
+
+    user = db.relationship('User', backref='images', lazy='joined')
+
+    def __repr__(self):
+        return f'<Image {self.file_name}>'

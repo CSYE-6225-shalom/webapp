@@ -4,8 +4,9 @@ from sqlalchemy.exc import OperationalError
 from sqlalchemy import text
 from dotenv import load_dotenv
 import logging
-from utils.models import db, User, get_est_time
+from utils.models import db, User, Image, get_est_time
 from utils.db_init import init_db
+from utils.s3 import upload_to_s3, delete_from_s3
 import bcrypt
 from flask_httpauth import HTTPBasicAuth
 from email_validator import validate_email, EmailNotValidError
@@ -13,6 +14,8 @@ from urllib.parse import quote_plus
 from statsd import StatsClient
 import time
 import sys
+from werkzeug.utils import secure_filename
+
 
 # Initialize HTTPBasicAuth
 auth = HTTPBasicAuth()
@@ -34,6 +37,15 @@ if 'pytest' not in sys.modules:
 # Define allowed headers globally
 # Any additional header added during runtime, should result in a 400 Bad Request
 ALLOWED_HEADERS = {'Authorization', 'Host', 'Accept', 'Connection', 'User-Agent', 'Accept-Encoding', 'Cache-Control', 'Postman-Token', 'Content-Type', 'Content-Length'}
+
+# Define allowed file extensions for profile picture uploads
+ALLOWED_IMAGE_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+
+
+# Function to check if the file extension is allowed
+def allowed_file(filename):
+    return '.' in filename and \
+        filename.rsplit('.', 1)[1].lower() in ALLOWED_IMAGE_EXTENSIONS
 
 
 # Function to reject body for GET requests
@@ -222,6 +234,117 @@ def create_app(testing=None):
         except Exception as e:
             logging.error(f"Error in getting user info: {e}")
             return jsonify({'message': 'User not found!'}), 404
+
+    @app.route('/v1/user/self/pic', methods=['POST'])
+    @auth.login_required
+    def upload_profile_picture():
+        try:
+            validation_response = validate_request(request)
+            if validation_response:
+                return validation_response
+            user_email = auth.current_user()
+            user = User.query.filter_by(email=user_email).first()
+
+            if 'file' not in request.files:
+                return jsonify({'message': 'No file part'}), 400
+
+            file = request.files['file']
+
+            if file.filename == '':
+                return jsonify({'message': 'No selected file'}), 400
+
+            if file and allowed_file(file.filename):
+                # Check if user already has an image
+                existing_image = Image.query.filter_by(user_id=user.id).first()
+                if existing_image:
+                    return jsonify({'message': 'An image already exists for this user'}), 400
+
+                # Generate a unique filename for the image
+                file_name = secure_filename(f"{user.id}_{file.filename}")
+                # Upload the file to S3
+                upload_to_s3(file, os.getenv('AWS_S3_BUCKET'), file_name)
+                # Create a new image record in the database
+                new_image = Image(
+                    file_name=file_name,
+                    url=f"https://{os.getenv('AWS_S3_BUCKET')}.s3.amazonaws.com/{file_name}",
+                    user_id=user.id
+                )
+                db.session.add(new_image)
+                db.session.commit()
+                user_info = {
+                    'id': new_image.id,
+                    'file_name': file_name,
+                    'url': new_image.url,
+                    'upload_date': new_image.upload_date,
+                    'user_id': new_image.user_id
+                }
+                return user_info, 201
+            else:
+                return jsonify({'message': 'Invalid file type'}), 400
+        except Exception as e:
+            logging.error(f"Error in uploading profile picture: {e}")
+            return jsonify({'message': 'Error uploading profile picture'}), 500
+
+    @app.route('/v1/user/self/pic', methods=['GET'])
+    @auth.login_required
+    def get_user_image():
+        try:
+            # This method should not accept any data in the request
+            error_response = reject_body_for_get()
+            if error_response:
+                return error_response
+            validation_response = validate_request(request)
+            if validation_response:
+                return validation_response
+            # Check if user has an existing image
+            user_email = auth.current_user()
+            user = User.query.filter_by(email=user_email).first()
+            existing_image = Image.query.filter_by(user_id=user.id).first()
+            if not existing_image:
+                return jsonify({'message': 'No image found for this user'}), 404
+
+            # Return the image details
+            user_info = {
+                'id': existing_image.id,
+                'file_name': existing_image.file_name,
+                'url': existing_image.url,
+                'upload_date': existing_image.upload_date,
+                'user_id': existing_image.user_id
+            }
+            return jsonify(user_info), 200
+        except Exception as e:
+            logging.error(f"Error in fetching profile picture details: {e}")
+            return jsonify({'message': 'Error fetching profile picture details'}), 500
+
+    @app.route('/v1/user/self/pic', methods=['DELETE'])
+    @auth.login_required
+    def delete_user_image():
+        try:
+            # This method should not accept any data in the request
+            error_response = reject_body_for_get()
+            if error_response:
+                return error_response
+            validation_response = validate_request(request)
+            if validation_response:
+                return validation_response
+            # Check if user has an existing image
+            user_email = auth.current_user()
+            user = User.query.filter_by(email=user_email).first()
+            print(user)
+            existing_image = Image.query.filter_by(user_id=user.id).first()
+            if not existing_image:
+                return jsonify({'message': 'No image found for this user'}), 404
+
+            # Delete the existing image from S3
+            delete_from_s3(os.getenv('AWS_S3_BUCKET'), existing_image.file_name)
+            # Delete the existing image record from the database
+            db.session.delete(existing_image)
+            db.session.commit()
+
+            return '', 204
+        except Exception as e:
+            logging.error(f"Error in deleting profile picture: {e}")
+            return jsonify({'message': 'Error deleting profile picture'}), 500
 
     # Decorator to handle error for authentication failures
     # This will handle 2 cases during authentication :
