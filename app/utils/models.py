@@ -3,7 +3,6 @@ from datetime import datetime
 import uuid
 from sqlalchemy.dialects.postgresql import UUID
 import pytz
-import logging
 
 db = SQLAlchemy()
 
@@ -17,7 +16,6 @@ def get_est_time():
 
 
 class User(db.Model):
-    logging.info("Creating User model...")
     __tablename__ = 'users'
 
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
@@ -33,7 +31,6 @@ class User(db.Model):
 
 
 class Image(db.Model):
-    logging.info("Creating Image model...")
     __tablename__ = 'images'
 
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)

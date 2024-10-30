@@ -262,7 +262,8 @@ def create_app(testing=None):
                 # Generate a unique filename for the image
                 file_name = secure_filename(f"{user.id}_{file.filename}")
                 # Upload the file to S3
-                upload_to_s3(file, os.getenv('AWS_S3_BUCKET'), file_name)
+                if not upload_to_s3(file, os.getenv('AWS_S3_BUCKET'), file_name):
+                    return jsonify({'message': 'Failed to upload to S3'}), 500
                 # Create a new image record in the database
                 new_image = Image(
                     file_name=file_name,
@@ -335,8 +336,9 @@ def create_app(testing=None):
             if not existing_image:
                 return jsonify({'message': 'No image found for this user'}), 404
 
-            # Delete the existing image from S3
-            delete_from_s3(os.getenv('AWS_S3_BUCKET'), existing_image.file_name)
+            # Delete the file from S3
+            if not delete_from_s3(os.getenv('AWS_S3_BUCKET'), existing_image.file_name):
+                return jsonify({'message': 'Failed to delete from S3'}), 500
             # Delete the existing image record from the database
             db.session.delete(existing_image)
             db.session.commit()
