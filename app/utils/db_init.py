@@ -2,9 +2,12 @@ import logging
 from sqlalchemy_utils import database_exists, create_database
 from sqlalchemy.exc import OperationalError
 
+# Configure Logging
+logger = logging.getLogger(__name__)
 
 def init_db(app, db):
     print("Initializing database...")
+    logger.info("Initializing database...")
     with app.app_context():
         try:
             # Check if the database exists, if not create it
@@ -14,7 +17,7 @@ def init_db(app, db):
 
             # Create all tables
             db.create_all()
-            logging.info("Database table created successfully.")
+            logging.info("Database tables created successfully.")
         except OperationalError as e:
             logging.error(f"Error connecting to the database: {e}")
         except Exception as e:
