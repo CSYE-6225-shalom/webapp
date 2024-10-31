@@ -36,7 +36,7 @@ class Image(db.Model):
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     file_name = db.Column(db.String(255), nullable=False)
     url = db.Column(db.String(255), nullable=False)
-    upload_date = db.Column(db.DateTime, nullable=False, default=get_est_time)
+    upload_date = db.Column(db.String, nullable=False, default=lambda: get_est_time()[:10])
     user_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id'), nullable=False)
 
     user = db.relationship('User', backref='images', lazy='joined')

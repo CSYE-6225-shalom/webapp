@@ -15,6 +15,7 @@ from statsd import StatsClient
 import time
 import sys
 from werkzeug.utils import secure_filename
+from sqlalchemy import event
 
 
 # Initialize HTTPBasicAuth
@@ -106,6 +107,18 @@ def create_app(testing=None):
     app = Flask(__name__)
     statsd_client = StatsClient('localhost', 8125)
     configure_app(app, testing)
+
+    with app.app_context():
+            # Add these database query monitoring events
+            @event.listens_for(db.engine, 'before_cursor_execute')
+            def before_cursor_execute(conn, cursor, statement, parameters, context, executemany):
+                conn.info.setdefault('query_start_time', time.time())
+                statsd_client.incr('database.query.count')
+            @event.listens_for(db.engine, 'after_cursor_execute')
+            def after_cursor_execute(conn, cursor, statement, parameters, context, executemany):
+                total_time = time.time() - conn.info['query_start_time']
+                statsd_client.timing('database.query.duration', total_time * 1000)  # Convert to milliseconds
+
 
     # Health check for database connection. By default GET method
     @app.route('/healthz')
@@ -260,15 +273,15 @@ def create_app(testing=None):
                     return jsonify({'message': 'An image already exists for this user'}), 400
 
                 # Generate a unique filename for the image
-                file_name = secure_filename(f"{user.id}_{file.filename}")
+                file_name = secure_filename(f"{file.filename}")
                 # Upload the file to S3
                 if not upload_to_s3(file, os.getenv('AWS_S3_BUCKET'), file_name):
                     return jsonify({'message': 'Failed to upload to S3'}), 500
                 # Create a new image record in the database
                 new_image = Image(
                     file_name=file_name,
-                    url=f"https://{os.getenv('AWS_S3_BUCKET')}.s3.amazonaws.com/{file_name}",
-                    user_id=user.id
+                    user_id=user.id,
+                    url=f"{os.getenv('AWS_S3_BUCKET')}/{user.id}/{file_name}",
                 )
                 db.session.add(new_image)
                 db.session.commit()
