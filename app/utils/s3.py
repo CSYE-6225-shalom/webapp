@@ -5,21 +5,8 @@ from statsd import StatsClient
 import time
 from functools import wraps
 
-
-aws_access_key_id = os.getenv("S3_AWS_ACCESS_KEY_ID")
-aws_secret_access_key = os.getenv("S3_AWS_SECRET_ACCESS_KEY")
-aws_region = os.getenv("AWS_REGION")
-
-# Initialize an S3 client with the credentials
-s3_client = boto3.client(
-    's3',
-    aws_access_key_id=aws_access_key_id,
-    aws_secret_access_key=aws_secret_access_key,
-    region_name=aws_region
-)
-
-# # Initialize the S3 client using the default credential provider chain
-# s3_client = boto3.client('s3', region_name=os.getenv('AWS_REGION'))
+# Initialize the S3 client using the default credential provider chain
+s3_client = boto3.client('s3', region_name=os.getenv('AWS_REGION'))
 
 # Initialize StatsD client
 statsd_client = StatsClient()
@@ -58,23 +45,29 @@ def measure_s3_package_size(func):
         return func(file, bucket_name, object_name)
     return wrapper
 
+
 @measure_s3_call_count
 @measure_s3_call_duration
 @measure_s3_package_size
 def upload_to_s3(file, bucket_name, object_name):
+    logger.info("Starting upload to S3")
     try:
         s3_client.upload_fileobj(file, bucket_name, object_name)
+        logger.info("Upload to S3 successful")
         return True
     except ClientError as e:
-        print(e)
+        logger.error(f"Failed to upload to S3: {e}")
         return False
+
 
 @measure_s3_call_count
 @measure_s3_call_duration
 def delete_from_s3(bucket_name, object_name):
+    logger.info("Starting deletion from S3")
     try:
         s3_client.delete_object(Bucket=bucket_name, Key=object_name)
+        logger.info("Deletion from S3 successful")
         return True
     except ClientError as e:
-        print(e)
+        logger.error(f"Failed to delete from S3: {e}")
         return False

@@ -13,7 +13,6 @@ from email_validator import validate_email, EmailNotValidError
 from urllib.parse import quote_plus
 from statsd import StatsClient
 import time
-import sys
 from werkzeug.utils import secure_filename
 from sqlalchemy import event
 
@@ -21,19 +20,11 @@ from sqlalchemy import event
 # Initialize HTTPBasicAuth
 auth = HTTPBasicAuth()
 
+# Configure Logging
+logger = logging.getLogger(__name__)
+
 # Load environment variables from .env
 load_dotenv()
-
-# Configure logging.. if not running under pytest
-if 'pytest' not in sys.modules:
-    logging.basicConfig(
-        level=logging.INFO,  # Set the logging level
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',  # Log format
-        handlers=[
-            logging.FileHandler("/var/log/webapp/csye6225-webapp.log"),  # Log file name
-            logging.StreamHandler()  # Also log to console
-        ]
-    )
 
 # Define allowed headers globally
 # Any additional header added during runtime, should result in a 400 Bad Request
@@ -109,16 +100,16 @@ def create_app(testing=None):
     configure_app(app, testing)
 
     with app.app_context():
-            # Add these database query monitoring events
-            @event.listens_for(db.engine, 'before_cursor_execute')
-            def before_cursor_execute(conn, cursor, statement, parameters, context, executemany):
-                conn.info.setdefault('query_start_time', time.time())
-                statsd_client.incr('database.query.count')
-            @event.listens_for(db.engine, 'after_cursor_execute')
-            def after_cursor_execute(conn, cursor, statement, parameters, context, executemany):
-                total_time = time.time() - conn.info['query_start_time']
-                statsd_client.timing('database.query.duration', total_time * 1000)  # Convert to milliseconds
+        # Add these database query monitoring events
+        @event.listens_for(db.engine, 'before_cursor_execute')
+        def before_cursor_execute(conn, cursor, statement, parameters, context, executemany):
+            conn.info.setdefault('query_start_time', time.time())
+            statsd_client.incr('database.query.count')
 
+        @event.listens_for(db.engine, 'after_cursor_execute')
+        def after_cursor_execute(conn, cursor, statement, parameters, context, executemany):
+            total_time = time.time() - conn.info['query_start_time']
+            statsd_client.timing('database.query.duration', total_time * 1000)  # Convert to milliseconds
 
     # Health check for database connection. By default GET method
     @app.route('/healthz')
