@@ -5,7 +5,6 @@ from statsd import StatsClient
 import time
 from functools import wraps
 import logging
-import utils.logging_config
 
 # Initialize the S3 client using the default credential provider chain
 s3_client = boto3.client('s3', region_name=os.getenv('AWS_REGION'))
