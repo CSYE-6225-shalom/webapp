@@ -50,10 +50,10 @@ def measure_s3_package_size(func):
 @measure_s3_call_duration
 @measure_s3_package_size
 def upload_to_s3(file, bucket_name, object_name):
-    logger.info("Starting upload to S3")
+    print("Starting upload to S3")
     try:
         s3_client.upload_fileobj(file, bucket_name, object_name)
-        logger.info("Upload to S3 successful")
+        print("Upload to S3 successful")
         return True
     except ClientError as e:
         logger.error(f"Failed to upload to S3: {e}")
@@ -63,10 +63,10 @@ def upload_to_s3(file, bucket_name, object_name):
 @measure_s3_call_count
 @measure_s3_call_duration
 def delete_from_s3(bucket_name, object_name):
-    logger.info("Starting deletion from S3")
+    print("Starting deletion from S3")
     try:
         s3_client.delete_object(Bucket=bucket_name, Key=object_name)
-        logger.info("Deletion from S3 successful")
+        print("Deletion from S3 successful")
         return True
     except ClientError as e:
         logger.error(f"Failed to delete from S3: {e}")
