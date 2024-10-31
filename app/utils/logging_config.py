@@ -1,7 +1,5 @@
 import logging
 import sys
-import logging
-import utils.logging_config
 
 if 'pytest' not in sys.modules:
     logging.basicConfig(
@@ -12,5 +10,5 @@ if 'pytest' not in sys.modules:
             logging.StreamHandler()  # Also log to console
         ]
     )
-    
+
 logging.info("\nLogging for application has been configured successfully!\n")

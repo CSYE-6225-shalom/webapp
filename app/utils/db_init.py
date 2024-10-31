@@ -5,6 +5,7 @@ from sqlalchemy.exc import OperationalError
 # Configure Logging
 logger = logging.getLogger(__name__)
 
+
 def init_db(app, db):
     print("Initializing database...")
     logger.info("Initializing database...")

@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 # Initialize StatsD client
 statsd_client = StatsClient()
 
+
 # Decorators to measure the number of calls, duration, and package size of S3 operations
 def measure_s3_call_count(func):
     @wraps(func)
@@ -24,6 +25,7 @@ def measure_s3_call_count(func):
         statsd_client.incr(f's3.{endpoint}.calls')
         return func(*args, **kwargs)
     return wrapper
+
 
 def measure_s3_call_duration(func):
     @wraps(func)
@@ -35,6 +37,7 @@ def measure_s3_call_duration(func):
         statsd_client.timing(f's3.{endpoint}.duration', duration * 1000)  # in ms
         return result
     return wrapper
+
 
 def measure_s3_package_size(func):
     @wraps(func)
@@ -60,6 +63,7 @@ def upload_to_s3(file, bucket_name, object_name):
     except ClientError as e:
         logger.error(f"Failed to upload to S3: {e}")
         return False
+
 
 @measure_s3_call_count
 @measure_s3_call_duration

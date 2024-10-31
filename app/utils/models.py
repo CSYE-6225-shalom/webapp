@@ -4,12 +4,12 @@ import uuid
 from sqlalchemy.dialects.postgresql import UUID
 import pytz
 import logging
-import utils.logging_config
 
 db = SQLAlchemy()
 
 # Configure Logging
 logger = logging.getLogger(__name__)
+
 
 # Had to use 'pytz' to set timezone to EST.
 # The timestamps were stored in EST timezone in the db, but when pulled
@@ -30,7 +30,7 @@ class User(db.Model):
     password = db.Column(db.String(255), nullable=False)
     account_created = db.Column(db.String, default=get_est_time)
     account_updated = db.Column(db.String, default=get_est_time, onupdate=get_est_time)
-    
+
     logger.info("User model created")
 
     def __repr__(self):
@@ -50,5 +50,6 @@ class Image(db.Model):
     user = db.relationship('User', backref='images', lazy='joined')
 
     logger.info("Image model created")
+
     def __repr__(self):
         return f'<Image {self.file_name}>'

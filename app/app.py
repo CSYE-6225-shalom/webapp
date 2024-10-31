@@ -15,7 +15,6 @@ from statsd import StatsClient
 import time
 from werkzeug.utils import secure_filename
 from sqlalchemy import event
-import utils.logging_config
 
 
 # Initialize HTTPBasicAuth
