@@ -43,6 +43,7 @@ ALLOWED_HEADERS = {'Authorization', 'Host', 'Accept', 'Connection', 'User-Agent'
 # Define allowed file extensions for profile picture uploads
 ALLOWED_IMAGE_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
+ALB_ADDED_HEADERS = {'X-Forwarded-For', 'X-Forwarded-Proto', 'X-Forwarded-Port', 'X-Amzn-Trace-Id', 'X-Forwarded-Host', 'X-Amz-Cf-Id', 'X-Amzn-RequestId'}
 
 # Function to check if the file extension is allowed
 def allowed_file(filename):
@@ -91,7 +92,8 @@ def validate_request(request):
         return jsonify({'message': 'Bad Request'}), 400
     # Check for new headers if added
     incoming_headers = set(request.headers.keys())
-    if not incoming_headers.issubset(ALLOWED_HEADERS):
+    allowed_headers = ALLOWED_HEADERS.union(ALB_ADDED_HEADERS)
+    if not incoming_headers.issubset(allowed_headers):
         return make_response(jsonify({"error": "Bad Request"}), 400)
     return None
 
@@ -129,9 +131,9 @@ def create_app(testing=None):
             error_response = reject_body_for_get()
             if error_response:
                 return error_response
-            # validation_response = validate_request(request)
-            # if validation_response:
-            #     return validation_response
+            validation_response = validate_request(request)
+            if validation_response:
+                return validation_response
             db.session.execute(text('SELECT 1'))
             return '', 200
         except OperationalError:
@@ -144,9 +146,9 @@ def create_app(testing=None):
     @app.route('/v1/user', methods=['POST'])
     def create_user():
         try:
-            # validation_response = validate_request(request)
-            # if validation_response:
-            #     return validation_response
+            validation_response = validate_request(request)
+            if validation_response:
+                return validation_response
             data = request.get_json()
             # Email address validation. If error occurs, this library returns appropriate messages
             try:
@@ -191,9 +193,9 @@ def create_app(testing=None):
     @auth.login_required
     def update_user_info():
         try:
-            # validation_response = validate_request(request)
-            # if validation_response:
-            #     return validation_response
+            validation_response = validate_request(request)
+            if validation_response:
+                return validation_response
             user_email = auth.current_user()
             user = User.query.filter_by(email=user_email).first()
             if user:
@@ -231,9 +233,9 @@ def create_app(testing=None):
             error_response = reject_body_for_get()
             if error_response:
                 return error_response
-            # validation_response = validate_request(request)
-            # if validation_response:
-            #     return validation_response
+            validation_response = validate_request(request)
+            if validation_response:
+                return validation_response
             user_email = auth.current_user()
             user = User.query.filter_by(email=user_email).first()
             user_info = {
@@ -253,9 +255,9 @@ def create_app(testing=None):
     @auth.login_required
     def upload_profile_picture():
         try:
-            # validation_response = validate_request(request)
-            # if validation_response:
-            #     return validation_response
+            validation_response = validate_request(request)
+            if validation_response:
+                return validation_response
             user_email = auth.current_user()
             user = User.query.filter_by(email=user_email).first()
 
@@ -308,9 +310,9 @@ def create_app(testing=None):
             error_response = reject_body_for_get()
             if error_response:
                 return error_response
-            # validation_response = validate_request(request)
-            # if validation_response:
-            #     return validation_response
+            validation_response = validate_request(request)
+            if validation_response:
+                return validation_response
             # Check if user has an existing image
             user_email = auth.current_user()
             user = User.query.filter_by(email=user_email).first()
@@ -339,9 +341,9 @@ def create_app(testing=None):
             error_response = reject_body_for_get()
             if error_response:
                 return error_response
-            # validation_response = validate_request(request)
-            # if validation_response:
-            #     return validation_response
+            validation_response = validate_request(request)
+            if validation_response:
+                return validation_response
             # Check if user has an existing image
             user_email = auth.current_user()
             user = User.query.filter_by(email=user_email).first()

@@ -33,8 +33,8 @@ jobs:
         echo PORT=${{ secrets.APP_PORT }} >> .env
         cat .env   
 
-    # - name: Run Flake8
-    #   run: flake8 . --ignore E501,E402
+    - name: Run Flake8
+      run: flake8 . --ignore E501,E402
 
     - name: Run unit tests
       run: pytest tests/test_unit.py --cov=app --cov-report=xml 
