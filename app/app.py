@@ -31,8 +31,6 @@ if 'pytest' not in sys.modules:
         ]
     )
 
-logging.info("\nLogging for application has been configured successfully!\n")
-
 # Load environment variables from .env
 load_dotenv()
 
@@ -108,7 +106,12 @@ def validate_password(password):
 # Flask app begins here
 def create_app(testing=None):
     app = Flask(__name__)
+    
+    # Configure logging
+    logging.info("\nLogging for application has been configured successfully!\n")
+    # Initialize StatsD client
     statsd_client = StatsClient('localhost', 8125)
+    # Configure the app
     configure_app(app, testing)
 
     with app.app_context():
@@ -135,8 +138,10 @@ def create_app(testing=None):
             if validation_response:
                 return validation_response
             db.session.execute(text('SELECT 1'))
+            logging.info("Health check passed")
             return '', 200
         except OperationalError:
+            logging.error("Database connection error")
             return '', 503
         except Exception as e:
             logging.error(f"Error in health check: {e}")
@@ -148,14 +153,17 @@ def create_app(testing=None):
         try:
             validation_response = validate_request(request)
             if validation_response:
+                logging.error("Bad Request. Invalid query parameters or headers")
                 return validation_response
             data = request.get_json()
             # Email address validation. If error occurs, this library returns appropriate messages
             try:
                 validate_email(data['email'])
             except EmailNotValidError as e:
+                logging.error(f"Invalid email address: {e}")
                 return jsonify({'message': str(e)}), 400
             if User.query.filter_by(email=data['email']).first():
+                logging.error("User already exists!")
                 return jsonify({'message': 'User already exists!'}), 400
             # Validate password
             is_valid, message = validate_password(data['password'])
