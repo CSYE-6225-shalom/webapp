@@ -38,3 +38,4 @@ Thumbs.db
 
 # Test files configuration
 .flake8
+load_testing.py

@@ -4,6 +4,10 @@ from botocore.exceptions import ClientError
 from statsd import StatsClient
 import time
 from functools import wraps
+import logging
+
+# Get a logger for this module
+logger = logging.getLogger(__name__)
 
 # Initialize the S3 client using the default credential provider chain
 s3_client = boto3.client('s3', region_name=os.getenv('AWS_REGION'))
@@ -50,24 +54,24 @@ def measure_s3_package_size(func):
 @measure_s3_call_duration
 @measure_s3_package_size
 def upload_to_s3(file, bucket_name, object_name):
-    print("Starting upload to S3")
+    logger.info("Starting upload to S3")
     try:
         s3_client.upload_fileobj(file, bucket_name, object_name)
-        print("Upload to S3 successful")
+        logger.info("Upload to S3 successful")
         return True
     except ClientError as e:
-        print(f"Failed to upload to S3: {e}")
+        logger.error(f"Failed to upload to S3: {e}")
         return False
 
 
 @measure_s3_call_count
 @measure_s3_call_duration
 def delete_from_s3(bucket_name, object_name):
-    print("Starting deletion from S3")
+    logger.info("Starting deletion from S3")
     try:
         s3_client.delete_object(Bucket=bucket_name, Key=object_name)
-        print("Deletion from S3 successful")
+        logger.info("Deletion from S3 successful")
         return True
     except ClientError as e:
-        print(f"Failed to delete from S3: {e}")
+        logger.error(f"Failed to delete from S3: {e}")
         return False

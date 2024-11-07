@@ -16,6 +16,7 @@ import time
 from werkzeug.utils import secure_filename
 from sqlalchemy import event
 import sys
+import socket
 
 # Initialize HTTPBasicAuth
 auth = HTTPBasicAuth()
@@ -31,8 +32,6 @@ if 'pytest' not in sys.modules:
         ]
     )
 
-logging.info("\nLogging for application has been configured successfully!\n")
-
 # Load environment variables from .env
 load_dotenv()
 
@@ -42,6 +41,8 @@ ALLOWED_HEADERS = {'Authorization', 'Host', 'Accept', 'Connection', 'User-Agent'
 
 # Define allowed file extensions for profile picture uploads
 ALLOWED_IMAGE_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+
+ALB_ADDED_HEADERS = {'X-Forwarded-For', 'X-Forwarded-Proto', 'X-Forwarded-Port', 'X-Amzn-Trace-Id', 'X-Forwarded-Host', 'X-Amz-Cf-Id', 'X-Amzn-RequestId'}
 
 
 # Function to check if the file extension is allowed
@@ -53,6 +54,7 @@ def allowed_file(filename):
 # Function to reject body for GET requests
 def reject_body_for_get():
     if request.method == 'GET' and (request.data or request.form):
+        logging.error("GET requests should not contain a body")
         return jsonify({'message': 'GET requests should not contain a body'}), 400
 
 
@@ -88,10 +90,13 @@ def verify_password(email, password):
 def validate_request(request):
     # Check for query parameters if added additionally
     if request.args:
+        logging.error("Query parameters are not allowed")
         return jsonify({'message': 'Bad Request'}), 400
     # Check for new headers if added
     incoming_headers = set(request.headers.keys())
-    if not incoming_headers.issubset(ALLOWED_HEADERS):
+    allowed_headers = ALLOWED_HEADERS.union(ALB_ADDED_HEADERS)
+    if not incoming_headers.issubset(allowed_headers):
+        logging.error("Invalid headers in request")
         return make_response(jsonify({"error": "Bad Request"}), 400)
     return None
 
@@ -99,6 +104,7 @@ def validate_request(request):
 # Password validation function
 def validate_password(password):
     if not password or len(password) < 5:
+        logging.error("Password must be at least 5 characters long.")
         return False, "Password must be at least 5 characters long."
     return True, ""
 
@@ -106,7 +112,13 @@ def validate_password(password):
 # Flask app begins here
 def create_app(testing=None):
     app = Flask(__name__)
+
+    # Configure logging
+    logging.info("\nLogging for application has been configured successfully!\n")
+    logging.info(f"Hostname: {socket.gethostname()}")
+    # Initialize StatsD client
     statsd_client = StatsClient('localhost', 8125)
+    # Configure the app
     configure_app(app, testing)
 
     with app.app_context():
@@ -133,8 +145,10 @@ def create_app(testing=None):
             if validation_response:
                 return validation_response
             db.session.execute(text('SELECT 1'))
+            logging.info("Health check passed")
             return '', 200
         except OperationalError:
+            logging.error("Database connection error")
             return '', 503
         except Exception as e:
             logging.error(f"Error in health check: {e}")
@@ -152,12 +166,15 @@ def create_app(testing=None):
             try:
                 validate_email(data['email'])
             except EmailNotValidError as e:
+                logging.error(f"Invalid email address: {e}")
                 return jsonify({'message': str(e)}), 400
             if User.query.filter_by(email=data['email']).first():
+                logging.error("User already exists!")
                 return jsonify({'message': 'User already exists!'}), 400
             # Validate password
             is_valid, message = validate_password(data['password'])
             if not is_valid:
+                logging.error(f"Password validation failed: {message}")
                 return jsonify({'message': message}), 400
             hashed = bcrypt.hashpw(data['password'].encode('utf-8'), bcrypt.gensalt())
             # Have to use decode here to avoid the password to be double-encoded
@@ -181,6 +198,7 @@ def create_app(testing=None):
                 'account_created': new_user.account_created,
                 'account_updated': new_user.account_updated
             }
+            logging.info("User created successfully!\n Info: %s", user_info)
             return user_info, 201
         except Exception as e:
             logging.error(f"Error in creating user: {e}")
@@ -201,6 +219,7 @@ def create_app(testing=None):
                 allowed_fields = {'first_name', 'last_name', 'password'}
                 for field in data.keys():
                     if field not in allowed_fields:
+                        logging.error(f"Invalid field in request: {field}")
                         return jsonify({'message': f'Invalid field in request: {field}'}), 400
                 # Update user info based on the fields provided. User can choose to update any field. Not mandatory to update all fields
                 if 'first_name' in data:
@@ -210,13 +229,16 @@ def create_app(testing=None):
                 if 'password' in data:
                     is_valid, message = validate_password(data['password'])
                     if not is_valid:
+                        logging.error(f"Password validation failed: {message}")
                         return jsonify({'message': message}), 400
                     existing_pwd = bcrypt.hashpw(data['password'].encode('utf-8'), bcrypt.gensalt())
                     user.password = existing_pwd.decode('utf-8')
                 user.account_updated = get_est_time()
                 db.session.commit()
+                logging.info("User info updated successfully!")
                 return jsonify({'message': 'User info updated successfully!'}), 204
             else:
+                logging.error("User not found!")
                 return jsonify({'message': 'User not found!'}), 404
         except Exception as e:
             logging.error(f"Error in updating user info: {e}")
@@ -244,6 +266,7 @@ def create_app(testing=None):
                 'account_created': user.account_created,
                 'account_updated': user.account_updated
             }
+            logging.info("User info fetched successfully!")
             return jsonify(user_info), 200
         except Exception as e:
             logging.error(f"Error in getting user info: {e}")
@@ -260,23 +283,27 @@ def create_app(testing=None):
             user = User.query.filter_by(email=user_email).first()
 
             if 'file' not in request.files:
+                logging.error("No file part")
                 return jsonify({'message': 'No file part'}), 400
 
             file = request.files['file']
 
             if file.filename == '':
+                logging.error("No selected file")
                 return jsonify({'message': 'No selected file'}), 400
 
             if file and allowed_file(file.filename):
                 # Check if user already has an image
                 existing_image = Image.query.filter_by(user_id=user.id).first()
                 if existing_image:
+                    logging.error("An image already exists for this user")
                     return jsonify({'message': 'An image already exists for this user'}), 400
 
                 # Generate a unique filename for the image
-                file_name = secure_filename(f"{file.filename}")
+                file_name = secure_filename(f"{user.id}_{file.filename}")
                 # Upload the file to S3
                 if not upload_to_s3(file, os.getenv('AWS_S3_BUCKET'), file_name):
+                    logging.error("Failed to upload to S3")
                     return jsonify({'message': 'Failed to upload to S3'}), 500
                 # Create a new image record in the database
                 new_image = Image(
@@ -293,8 +320,10 @@ def create_app(testing=None):
                     'upload_date': new_image.upload_date,
                     'user_id': new_image.user_id
                 }
+                logging.info("Profile picture uploaded successfully!")
                 return user_info, 201
             else:
+                logging.error("Invalid file type")
                 return jsonify({'message': 'Invalid file type'}), 400
         except Exception as e:
             logging.error(f"Error in uploading profile picture: {e}")
@@ -316,6 +345,7 @@ def create_app(testing=None):
             user = User.query.filter_by(email=user_email).first()
             existing_image = Image.query.filter_by(user_id=user.id).first()
             if not existing_image:
+                logging.error("No image found for this user")
                 return jsonify({'message': 'No image found for this user'}), 404
 
             # Return the image details
@@ -326,6 +356,7 @@ def create_app(testing=None):
                 'upload_date': existing_image.upload_date,
                 'user_id': existing_image.user_id
             }
+            logging.info("Profile picture details fetched successfully!")
             return jsonify(user_info), 200
         except Exception as e:
             logging.error(f"Error in fetching profile picture details: {e}")
@@ -345,18 +376,21 @@ def create_app(testing=None):
             # Check if user has an existing image
             user_email = auth.current_user()
             user = User.query.filter_by(email=user_email).first()
-            print(user)
+            logging.info(f"Endpoint: {request.endpoint}")
+            logging.info(f"User: {user}")
             existing_image = Image.query.filter_by(user_id=user.id).first()
             if not existing_image:
+                logging.error("No image found for this user")
                 return jsonify({'message': 'No image found for this user'}), 404
 
             # Delete the file from S3
             if not delete_from_s3(os.getenv('AWS_S3_BUCKET'), existing_image.file_name):
+                logging.error("Failed to delete from S3")
                 return jsonify({'message': 'Failed to delete from S3'}), 500
             # Delete the existing image record from the database
             db.session.delete(existing_image)
             db.session.commit()
-
+            logging.info("Profile picture deleted successfully!")
             return '', 204
         except Exception as e:
             logging.error(f"Error in deleting profile picture: {e}")
@@ -382,6 +416,7 @@ def create_app(testing=None):
     # Decorator to handle error for all requests where the path is incorrect
     @app.errorhandler(404)
     def page_not_found(e):
+        logging.error("Not Found. The requested URL was not found on the server.")
         return jsonify({'message': (
             'Not Found. The requested URL was not found on the server. '
             'If you entered the URL manually please check your spelling and try again.'
