@@ -16,6 +16,7 @@ import time
 from werkzeug.utils import secure_filename
 from sqlalchemy import event
 import sys
+import socket
 
 # Initialize HTTPBasicAuth
 auth = HTTPBasicAuth()
@@ -113,6 +114,7 @@ def create_app(testing=None):
     
     # Configure logging
     logging.info("\nLogging for application has been configured successfully!\n")
+    logging.info(f"Hostname: {socket.gethostname()}")
     # Initialize StatsD client
     statsd_client = StatsClient('localhost', 8125)
     # Configure the app
