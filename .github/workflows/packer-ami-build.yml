@@ -2,7 +2,7 @@ name: Build Webapp AMI
 
 on:
   push:
-    branches: [ a07-test ]
+    branches: [ main ]
 
 jobs:
   build:
