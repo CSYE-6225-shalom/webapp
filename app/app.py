@@ -44,6 +44,7 @@ ALLOWED_IMAGE_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
 ALB_ADDED_HEADERS = {'X-Forwarded-For', 'X-Forwarded-Proto', 'X-Forwarded-Port', 'X-Amzn-Trace-Id', 'X-Forwarded-Host', 'X-Amz-Cf-Id', 'X-Amzn-RequestId'}
 
+
 # Function to check if the file extension is allowed
 def allowed_file(filename):
     return '.' in filename and \
@@ -111,7 +112,7 @@ def validate_password(password):
 # Flask app begins here
 def create_app(testing=None):
     app = Flask(__name__)
-    
+
     # Configure logging
     logging.info("\nLogging for application has been configured successfully!\n")
     logging.info(f"Hostname: {socket.gethostname()}")

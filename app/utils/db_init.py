@@ -5,6 +5,7 @@ import logging
 # Get a logger for this module
 logger = logging.getLogger(__name__)
 
+
 def init_db(app, db):
     logger.info("Initializing database...")
     with app.app_context():

@@ -10,6 +10,7 @@ db = SQLAlchemy()
 # Get a logger for this module
 logger = logging.getLogger(__name__)
 
+
 # Had to use 'pytz' to set timezone to EST.
 # The timestamps were stored in EST timezone in the db, but when pulled
 # from the db they were converted to GMT and displayed in Postman.
