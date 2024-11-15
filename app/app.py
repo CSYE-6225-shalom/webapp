@@ -68,7 +68,7 @@ def generate_verification_token():
     return str(uuid.uuid4())
 
 
-def create_verification_link(user_email,token):
+def create_verification_link(user_email, token):
     verification_url = os.getenv('VERIFICATION_URL')
     return f"{verification_url}?user={user_email}&token={token}"
 
@@ -76,14 +76,14 @@ def create_verification_link(user_email,token):
 def publish_to_sns(user_data):
     try:
         sns = boto3.client('sns', region_name=os.getenv('AWS_REGION'))
-        
+
         message = {
             'email': user_data['email'],
             'first_name': user_data['first_name'],
             'verification_link': user_data['verification_link'],
             'expiration_time': (datetime.fromisoformat(get_est_time()) + timedelta(minutes=2)).isoformat()
         }
-        
+
         response = sns.publish(
             TopicArn=os.getenv('AWS_SNS_TOPIC_ARN'),
             Message=json.dumps(message),
@@ -250,7 +250,7 @@ def create_app(testing=None):
                 'first_name': new_user.first_name,
                 'verification_link': verification_link
             }
-            
+
             if not publish_to_sns(sns_data):
                 logging.error("Failed to publish verification message to SNS")
                 return jsonify({'message': 'Failed to publish verification message to SNS'}), 500
@@ -271,30 +271,30 @@ def create_app(testing=None):
     # Method to verify email
     @app.route('/v1/verify-email', methods=['GET'])
     def verify_email():
-        try:     
+        try:
             # Get the verification token from the query parameters
             token = request.args.get('token')
             if not token:
                 return jsonify({'message': 'Missing verification token'}), 400
-            
+
             # Check if the token is valid in the database
             user = User.query.filter_by(verification_token=token).first()
             if not user:
                 return jsonify({'message': 'Invalid verification token'}), 404
-            
+
             # Check if the token is still within the expiration time (2 minutes)
             token_created = datetime.fromisoformat(user.verification_token_created)
             now = datetime.now(token_created.tzinfo)
             expiration_time = token_created + timedelta(minutes=2)
             if now > expiration_time:
                 return jsonify({'message': 'Verification token expired'}), 400
-            
+
             # Update the user's verified status
             user.is_verified = True
             user.verification_token = None
             user.verification_token_created = None
             db.session.commit()
-            
+
             return jsonify({'message': 'Email verified successfully'}), 200
         except Exception as e:
             logging.error(f"Error in verifying email: {e}")
