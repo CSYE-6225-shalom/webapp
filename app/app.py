@@ -17,6 +17,11 @@ from werkzeug.utils import secure_filename
 from sqlalchemy import event
 import sys
 import socket
+import uuid
+from datetime import datetime, timedelta
+import boto3
+import json
+from functools import wraps
 
 # Initialize HTTPBasicAuth
 auth = HTTPBasicAuth()
@@ -56,6 +61,39 @@ def reject_body_for_get():
     if request.method == 'GET' and (request.data or request.form):
         logging.error("GET requests should not contain a body")
         return jsonify({'message': 'GET requests should not contain a body'}), 400
+
+
+# Add these utility functions
+def generate_verification_token():
+    return str(uuid.uuid4())
+
+
+def create_verification_link(user_email, token):
+    verification_url = os.getenv('VERIFICATION_URL')
+    return f"{verification_url}?user={user_email}&token={token}"
+
+
+def publish_to_sns(user_data):
+    try:
+        sns = boto3.client('sns', region_name=os.getenv('AWS_REGION'))
+
+        message = {
+            'email': user_data['email'],
+            'first_name': user_data['first_name'],
+            'verification_link': user_data['verification_link'],
+            'expiration_time': (datetime.fromisoformat(get_est_time()) + timedelta(minutes=2)).isoformat()
+        }
+
+        response = sns.publish(
+            TopicArn=os.getenv('AWS_SNS_TOPIC_ARN'),
+            Message=json.dumps(message),
+            MessageStructure='string'
+        )
+        logging.info(f"SNS message published successfully: {response['MessageId']}")
+        return True
+    except Exception as e:
+        logging.error(f"Error publishing to SNS: {e}")
+        return False
 
 
 def configure_app(app, testing):
@@ -99,6 +137,17 @@ def validate_request(request):
         logging.error("Invalid headers in request")
         return make_response(jsonify({"error": "Bad Request"}), 400)
     return None
+
+
+def require_verified_user(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        user_email = auth.current_user()
+        user = User.query.filter_by(email=user_email).first()
+        if not user or not user.is_verified:
+            return jsonify({'message': 'User is not verified'}), 403
+        return f(*args, **kwargs)
+    return decorated_function
 
 
 # Password validation function
@@ -171,6 +220,8 @@ def create_app(testing=None):
             if User.query.filter_by(email=data['email']).first():
                 logging.error("User already exists!")
                 return jsonify({'message': 'User already exists!'}), 400
+            # Create user with verification token
+            verification_token = generate_verification_token()
             # Validate password
             is_valid, message = validate_password(data['password'])
             if not is_valid:
@@ -186,10 +237,23 @@ def create_app(testing=None):
                 first_name=data['first_name'],
                 last_name=data['last_name'],
                 email=data['email'],
-                password=hashed_decoded
+                password=hashed_decoded,
+                verification_token=verification_token,
+                verification_token_created=get_est_time()
             )
             db.session.add(new_user)
             db.session.commit()
+            # Generate verification link and publish to SNS
+            verification_link = create_verification_link(new_user.email, verification_token)
+            sns_data = {
+                'email': new_user.email,
+                'first_name': new_user.first_name,
+                'verification_link': verification_link
+            }
+
+            if not publish_to_sns(sns_data):
+                logging.error("Failed to publish verification message to SNS")
+                return jsonify({'message': 'Failed to publish verification message to SNS'}), 500
             user_info = {
                 'id': new_user.id,
                 'first_name': new_user.first_name,
@@ -203,6 +267,38 @@ def create_app(testing=None):
         except Exception as e:
             logging.error(f"Error in creating user: {e}")
             return jsonify({'message': f"Missing fields. {str(e)}"}), 400
+
+    # Method to verify email
+    @app.route('/v1/verify-email', methods=['GET'])
+    def verify_email():
+        try:
+            # Get the verification token from the query parameters
+            token = request.args.get('token')
+            if not token:
+                return jsonify({'message': 'Missing verification token'}), 400
+
+            # Check if the token is valid in the database
+            user = User.query.filter_by(verification_token=token).first()
+            if not user:
+                return jsonify({'message': 'Invalid verification token'}), 404
+
+            # Check if the token is still within the expiration time (2 minutes)
+            token_created = datetime.fromisoformat(user.verification_token_created)
+            now = datetime.now(token_created.tzinfo)
+            expiration_time = token_created + timedelta(minutes=2)
+            if now > expiration_time:
+                return jsonify({'message': 'Verification token expired'}), 400
+
+            # Update the user's verified status
+            user.is_verified = True
+            user.verification_token = None
+            user.verification_token_created = None
+            db.session.commit()
+
+            return jsonify({'message': 'Email verified successfully'}), 200
+        except Exception as e:
+            logging.error(f"Error in verifying email: {e}")
+            return jsonify({'message': 'Error verifying email'}), 500
 
     # Method to Update existing user info after authentication
     @app.route('/v1/user/self', methods=['PUT'])
@@ -246,6 +342,7 @@ def create_app(testing=None):
 
     # Method to get existing user's info after authentication
     @app.route('/v1/user/self', methods=['GET'])
+    @require_verified_user
     @auth.login_required
     def get_user_info():
         try:

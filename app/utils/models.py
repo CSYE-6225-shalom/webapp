@@ -30,6 +30,10 @@ class User(db.Model):
     password = db.Column(db.String(255), nullable=False)
     account_created = db.Column(db.String, default=get_est_time)
     account_updated = db.Column(db.String, default=get_est_time, onupdate=get_est_time)
+    is_verified = db.Column(db.Boolean, default=False)
+    verification_token = db.Column(db.String, default=uuid.uuid4)
+    verification_token_created = db.Column(db.String, default=get_est_time)
+    verification_email_count = db.Column(db.Integer, default=0)
 
     logger.info("User model created")
 
