@@ -304,6 +304,7 @@ def create_app(testing=None):
     # Method to Update existing user info after authentication
     @app.route('/v1/user/self', methods=['PUT'])
     @auth.login_required
+    @require_verified_user
     def update_user_info():
         try:
             validation_response = validate_request(request)
@@ -343,8 +344,8 @@ def create_app(testing=None):
 
     # Method to get existing user's info after authentication
     @app.route('/v1/user/self', methods=['GET'])
-    @require_verified_user
     @auth.login_required
+    @require_verified_user
     def get_user_info():
         try:
             # This method should not accept any data in the request
@@ -372,6 +373,7 @@ def create_app(testing=None):
 
     @app.route('/v1/user/self/pic', methods=['POST'])
     @auth.login_required
+    @require_verified_user
     def upload_profile_picture():
         try:
             validation_response = validate_request(request)
@@ -429,6 +431,7 @@ def create_app(testing=None):
 
     @app.route('/v1/user/self/pic', methods=['GET'])
     @auth.login_required
+    @require_verified_user
     def get_user_image():
         try:
             # This method should not accept any data in the request
@@ -462,6 +465,7 @@ def create_app(testing=None):
 
     @app.route('/v1/user/self/pic', methods=['DELETE'])
     @auth.login_required
+    @require_verified_user
     def delete_user_image():
         try:
             # This method should not accept any data in the request
