@@ -68,6 +68,7 @@ def generate_verification_token():
     return str(uuid.uuid4())
 
 
+# Create verification link for the user which will be sent to SNS topic and then to user by lambda
 def create_verification_link(user_email, token):
     verification_url = os.getenv('VERIFICATION_URL')
     return f"{verification_url}?user={user_email}&token={token}"
