@@ -139,7 +139,7 @@ jobs:
         AWS_ACCESS_KEY_ID: ${{ secrets.DEMO_AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.DEMO_AWS_SECRET_ACCESS_KEY }}
         AWS_REGION: ${{ secrets.AWS_REGION }}
-        AUTOSCALING_GROUP_NAME: "dev-asg"
+        AUTOSCALING_GROUP_NAME: "demo-asg"
       run: |
         INSTANCE_REFRESH_ID=$(aws autoscaling start-instance-refresh \
           --auto-scaling-group-name $AUTOSCALING_GROUP_NAME \
@@ -153,7 +153,7 @@ jobs:
         AWS_ACCESS_KEY_ID: ${{ secrets.DEMO_AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.DEMO_AWS_SECRET_ACCESS_KEY }}
         AWS_REGION: ${{ secrets.AWS_REGION }}
-        AUTOSCALING_GROUP_NAME: "dev-asg"
+        AUTOSCALING_GROUP_NAME: "demo-asg"
       run: |
         while true; do
           STATUS=$(aws autoscaling describe-instance-refreshes \
