@@ -94,11 +94,11 @@ jobs:
         AWS_REGION: ${{ secrets.AWS_REGION }}
         AWS_DEMO_ACCOUNT_ID: ${{ secrets.AWS_DEMO_ACCOUNT_ID }}
       run: |
-        packer build \
+        PACKER_OUTPUT=$(packer build \
           -var "DEV_DEFAUTLT_VPC_ID=$DEV_DEFAUTLT_VPC_ID" \
           -var "AWS_REGION=$AWS_REGION" \
           -var "AWS_DEMO_ACCOUNT_ID=$AWS_DEMO_ACCOUNT_ID" \
-          webapp-ami.pkr.hcl
+          webapp-ami.pkr.hcl)
           
         # Extract the AMI ID from the output
         AMI_ID=$(echo "$PACKER_OUTPUT" | grep -o 'ami-[a-zA-Z0-9]*' | tail -n 1)
