@@ -112,7 +112,7 @@ jobs:
     - name: Update Launch Template with new AMI ID
       env:
         AWS_REGION: ${{ secrets.AWS_REGION }}
-        LAUNCH_TEMPLATE_NAME: "csye6225_asg"
+        LAUNCH_TEMPLATE_NAME: csye6225_asg
       run: |
         aws ec2 create-launch-template-version \
           --launch-template-name $LAUNCH_TEMPLATE_NAME \
