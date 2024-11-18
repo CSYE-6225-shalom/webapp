@@ -99,8 +99,21 @@ jobs:
           -var "AWS_REGION=$AWS_REGION" \
           -var "AWS_DEMO_ACCOUNT_ID=$AWS_DEMO_ACCOUNT_ID" \
           webapp-ami.pkr.hcl
-        AMI_ID=$(packer build -machine-readable webapp-ami.pkr.hcl | awk -F, '$0 ~/artifact,0,id/ {print $6}')
-        echo "ami_id=$AMI_ID" >> $GITHUB_OUTPUT
+          
+        # Extract the AMI ID from the output
+        AMI_ID=$(echo "$PACKER_OUTPUT" | grep -o 'ami-[a-zA-Z0-9]*' | tail -n 1)
+
+        # Print the AMI ID to the logs
+        echo "Extracted AMI ID: $AMI_ID"
+        
+        # Check if AMI_ID was extracted successfully
+        if [ -z "$AMI_ID" ]; then
+          echo "Failed to extract AMI ID from Packer output"
+          exit 1
+        fi
+
+        # Set the AMI_ID as an output
+        echo "::set-output name=ami_id::$AMI_ID"
       continue-on-error: false
 
     - name: Configure AWS CLI for Demo Account
