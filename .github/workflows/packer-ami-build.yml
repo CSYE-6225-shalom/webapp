@@ -113,6 +113,8 @@ jobs:
       env:
         AWS_REGION: ${{ secrets.AWS_REGION }}
         LAUNCH_TEMPLATE_NAME: csye6225_asg
+        AWS_ACCESS_KEY_ID: ${{ secrets.DEMO_AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.DEMO_AWS_SECRET_ACCESS_KEY }}
       run: |
         aws ec2 create-launch-template-version \
           --launch-template-name $LAUNCH_TEMPLATE_NAME \
@@ -121,6 +123,8 @@ jobs:
 
     - name: Start Instance Refresh for Auto Scaling Group
       env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.DEMO_AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.DEMO_AWS_SECRET_ACCESS_KEY }}
         AWS_REGION: ${{ secrets.AWS_REGION }}
         AUTOSCALING_GROUP_NAME: "dev-asg"
       run: |
@@ -133,6 +137,8 @@ jobs:
 
     - name: Wait for Instance Refresh to complete
       env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.DEMO_AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.DEMO_AWS_SECRET_ACCESS_KEY }}
         AWS_REGION: ${{ secrets.AWS_REGION }}
         AUTOSCALING_GROUP_NAME: "dev-asg"
       run: |
