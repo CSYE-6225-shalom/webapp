@@ -94,12 +94,12 @@ jobs:
         AWS_REGION: ${{ secrets.AWS_REGION }}
         AWS_DEMO_ACCOUNT_ID: ${{ secrets.AWS_DEMO_ACCOUNT_ID }}
       run: |
-        AMI_ID=$(packer build \
+        packer build \
           -var "DEV_DEFAUTLT_VPC_ID=$DEV_DEFAUTLT_VPC_ID" \
           -var "AWS_REGION=$AWS_REGION" \
           -var "AWS_DEMO_ACCOUNT_ID=$AWS_DEMO_ACCOUNT_ID" \
-          -machine-readable \
-          webapp-ami.pkr.hcl | grep 'amazon-ebs: AMIs were created:' | awk -F: '{print $NF}' | tr -d '[:space:]')
+          webapp-ami.pkr.hcl
+        AMI_ID=$(packer build -machine-readable webapp-ami.pkr.hcl | awk -F, '$0 ~/artifact,0,id/ {print $6}')
         echo "ami_id=$AMI_ID" >> $GITHUB_OUTPUT
       continue-on-error: false
 
