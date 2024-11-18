@@ -87,7 +87,8 @@ jobs:
           -var "AWS_DEMO_ACCOUNT_ID=$AWS_DEMO_ACCOUNT_ID" \
           .
 
-    - name: Packer Build AMI
+    - name: Packer Build AMI in the Dev account
+      id: packer-build
       env:
         DEV_DEFAUTLT_VPC_ID: ${{ secrets.DEV_DEFAUTLT_VPC_ID }}
         AWS_REGION: ${{ secrets.AWS_REGION }}
@@ -97,5 +98,67 @@ jobs:
           -var "DEV_DEFAUTLT_VPC_ID=$DEV_DEFAUTLT_VPC_ID" \
           -var "AWS_REGION=$AWS_REGION" \
           -var "AWS_DEMO_ACCOUNT_ID=$AWS_DEMO_ACCOUNT_ID" \
-          webapp-ami.pkr.hcl
+          -machine-readable \
+          webapp-ami.pkr.hcl | awk -F, '$0 ~ /artifact,0,id/ {print $6}' | tail -1)
+        echo "ami_id=$AMI_ID" >> $GITHUB_OUTPUT
       continue-on-error: false
+
+    - name: Configure AWS CLI for Demo Account
+      run: |
+        aws configure set aws_access_key_id ${{ secrets.DEMO_AWS_ACCESS_KEY_ID }}
+        aws configure set aws_secret_access_key ${{ secrets.DEMO_AWS_SECRET_ACCESS_KEY }}
+        aws configure set region ${{ secrets.AWS_REGION }}
+
+    - name: Update Launch Template with new AMI ID
+      env:
+        AWS_REGION: ${{ secrets.AWS_REGION }}
+        LAUNCH_TEMPLATE_NAME: "csye6225_asg"
+      run: |
+        aws ec2 create-launch-template-version \
+          --launch-template-name $LAUNCH_TEMPLATE_NAME \
+          --source-version '$Latest' \
+          --launch-template-data "{\"ImageId\":\"${{ steps.packer-build.outputs.ami_id }}\"}"
+
+    - name: Start Instance Refresh for Auto Scaling Group
+      env:
+        AWS_REGION: ${{ secrets.AWS_REGION }}
+        AUTOSCALING_GROUP_NAME: "dev-asg"
+      run: |
+        INSTANCE_REFRESH_ID=$(aws autoscaling start-instance-refresh \
+          --auto-scaling-group-name $AUTOSCALING_GROUP_NAME \
+          --strategy Rolling \
+          --query 'InstanceRefreshId' \
+          --output text)
+        echo "instance_refresh_id=$INSTANCE_REFRESH_ID" >> $GITHUB_OUTPUT
+
+    - name: Wait for Instance Refresh to complete
+      env:
+        AWS_REGION: ${{ secrets.AWS_REGION }}
+        AUTOSCALING_GROUP_NAME: "dev-asg"
+      run: |
+        while true; do
+          STATUS=$(aws autoscaling describe-instance-refreshes \
+            --auto-scaling-group-name $AUTOSCALING_GROUP_NAME \
+            --instance-refresh-ids $INSTANCE_REFRESH_ID \
+            --query 'InstanceRefreshes[0].Status' \
+            --output text)
+          
+          case $STATUS in
+            Pending|InProgress)
+              echo "Instance refresh in progress..."
+              sleep 30
+              ;;
+            Successful)
+              echo "Instance refresh completed successfully"
+              exit 0
+              ;;
+            Failed)
+              echo "Instance refresh failed"
+              exit 1
+              ;;
+            *)
+              echo "Unknown status: $STATUS"
+              exit 1
+              ;;
+          esac
+        done
