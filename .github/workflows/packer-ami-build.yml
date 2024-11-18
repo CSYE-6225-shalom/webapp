@@ -99,7 +99,7 @@ jobs:
           -var "AWS_REGION=$AWS_REGION" \
           -var "AWS_DEMO_ACCOUNT_ID=$AWS_DEMO_ACCOUNT_ID" \
           -machine-readable \
-          webapp-ami.pkr.hcl | awk -F, '$0 ~ /artifact,0,id/ {print $6}' | tail -1)
+          webapp-ami.pkr.hcl | grep 'amazon-ebs: AMIs were created:' | awk -F: '{print $NF}' | tr -d '[:space:]')
         echo "ami_id=$AMI_ID" >> $GITHUB_OUTPUT
       continue-on-error: false
 
