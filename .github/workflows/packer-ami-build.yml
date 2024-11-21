@@ -125,7 +125,7 @@ jobs:
     - name: Update Launch Template with new AMI ID
       env:
         AWS_REGION: ${{ secrets.AWS_REGION }}
-        LAUNCH_TEMPLATE_NAME: csye6225_asg
+        LAUNCH_TEMPLATE_NAME: ${{ secrets.DEMO_EC2_LAUNCH_TEMPLATE_NAME }}
         AWS_ACCESS_KEY_ID: ${{ secrets.DEMO_AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.DEMO_AWS_SECRET_ACCESS_KEY }}
       run: |
@@ -139,7 +139,7 @@ jobs:
         AWS_ACCESS_KEY_ID: ${{ secrets.DEMO_AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.DEMO_AWS_SECRET_ACCESS_KEY }}
         AWS_REGION: ${{ secrets.AWS_REGION }}
-        AUTOSCALING_GROUP_NAME: "demo-asg"
+        AUTOSCALING_GROUP_NAME: ${{ secrets.DEMO_AUTOSCALING_GROUP_NAME }}
       run: |
         INSTANCE_REFRESH_ID=$(aws autoscaling start-instance-refresh \
           --auto-scaling-group-name $AUTOSCALING_GROUP_NAME \
@@ -153,7 +153,7 @@ jobs:
         AWS_ACCESS_KEY_ID: ${{ secrets.DEMO_AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.DEMO_AWS_SECRET_ACCESS_KEY }}
         AWS_REGION: ${{ secrets.AWS_REGION }}
-        AUTOSCALING_GROUP_NAME: "demo-asg"
+        AUTOSCALING_GROUP_NAME: ${{ secrets.DEMO_AUTOSCALING_GROUP_NAME }}
       run: |
         while true; do
           STATUS=$(aws autoscaling describe-instance-refreshes \
