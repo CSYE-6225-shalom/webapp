@@ -240,7 +240,8 @@ def create_app(testing=None):
                 email=data['email'],
                 password=hashed_decoded,
                 verification_token=verification_token,
-                verification_token_created=get_est_time()
+                verification_token_created=get_est_time(),
+                verification_email_count=0
             )
             db.session.add(new_user)
             db.session.commit()
@@ -255,6 +256,11 @@ def create_app(testing=None):
             if not publish_to_sns(sns_data):
                 logging.error("Failed to publish verification message to SNS")
                 return jsonify({'message': 'Failed to publish verification message to SNS'}), 500
+
+            # Increment verification_email_count by 1
+            new_user.verification_email_count += 1
+            db.session.commit()
+
             user_info = {
                 'id': new_user.id,
                 'first_name': new_user.first_name,
