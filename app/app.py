@@ -204,6 +204,27 @@ def create_app(testing=None):
             logging.error(f"Error in health check: {e}")
             return '', 500
 
+    # Health check for database connection. By default GET method
+    @app.route('/cicdA')
+    def health_check2():
+        try:
+            # This method should not accept any data in the request
+            error_response = reject_body_for_get()
+            if error_response:
+                return error_response
+            validation_response = validate_request(request)
+            if validation_response:
+                return validation_response
+            db.session.execute(text('SELECT 1'))
+            logging.info("Health check passed")
+            return '', 200
+        except OperationalError:
+            logging.error("Database connection error")
+            return '', 503
+        except Exception as e:
+            logging.error(f"Error in health check: {e}")
+            return '', 500
+
     # Method to Create user
     @app.route('/v1/user', methods=['POST'])
     def create_user():
