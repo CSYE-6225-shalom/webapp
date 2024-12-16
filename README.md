@@ -3,6 +3,10 @@ Semester: FALL 2024
 
 ---
 
+Architecture Diagram: 
+![Arch diagram](media/CSYE6225_arch.jpeg)
+
+
 Building a Cloud Native Web Application: 
 
 - Server Operating System: Ubuntu 24.04 LTS
@@ -12,6 +16,9 @@ Building a Cloud Native Web Application:
 - ORM Framework: Python with SQLAlchemy
 
 ---
+
+Infra repo: https://github.com/Shalomd6298/tf-aws-infra.git
+Serverless infra repo: https://github.com/Shalomd6298/serverless.git
 
 ## Table of Contents
 - [Objective](#objective)
